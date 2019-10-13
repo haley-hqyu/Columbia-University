@@ -1,0 +1,797 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Huiqian Yu
+---
+
+HW2 for SCIDS
+
+```{r}
+# HW2: loop2
+#
+# 1. Use a `for` loop to create a vector `x1` that stores the Displacement (`disp`) of the `mtcars` dataset, whose values are 160 or higher.
+# 2. Use a `for` loop to create a vector `x2` that stores the Displacement (`disp`) of the `mtcars` dataset in order, until it observes a value strictly smaller than 160.(Do not include that value less than 160).
+# 3. Do the above exercise no.2 again, but use a `while` loop instead, name the vector `x2_new`.
+# 4. Use a `for` loop to create a vector `x3` that stores the Displacement (`disp`) of the `mtcars` dataset, making all the values greater than 160 to be exactly 160.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+x1=c(0)
+j=1
+for(i in 1:length(mtcars$disp)){
+	if (mtcars$disp[i]>=160){
+		x1[j]=mtcars$disp[i]
+		j=j+1
+	}
+}
+#x1
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+x2=c(0)
+j=1
+for(i in 1:length(mtcars$disp)){
+	if(mtcars$disp[i]>=160){
+		x2[j]=mtcars$disp[i]
+		j=j+1
+	}
+	else break
+}
+x2
+## Do not modify this line! ## Write your code for 3. after this line! ##
+i=1
+j=1
+x2_new=c(0)
+while(mtcars$disp[i]>=160){
+	x2_new[i]=mtcars$disp[i]
+	i=i+1
+	j=j+1
+}
+x2_new
+## Do not modify this line! ## Write your code for 4. after this line! ##
+x3=c(0)
+j=1
+for(i in 1:length(mtcars$disp)){
+	if(mtcars$disp[i]>160){
+		x3[j]=160
+		j=j+1
+	}
+	else {
+		x3[j]=mtcars$disp[i]
+		j=j+1}
+}
+x3
+```
+
+```{r}
+# HW2: Loops
+#
+# 1. Initialize a 10*10 matrice with NA, called `mat`.
+# 2. Use a `for` loop to create the following matrix, and store it in `mat`.
+# 
+# 0    1    2    3    4    5    6    7    8     9
+# 1    0    1    2    3    4    5    6    7     8
+# 2    1    0    1    2    3    4    5    6     7
+# 3    2    1    0    1    2    3    4    5     6
+# 4    3    2    1    0    1    2    3    4     5
+# 5    4    3    2    1    0    1    2    3     4
+# 6    5    4    3    2    1    0    1    2     3
+# 7    6    5    4    3    2    1    0    1     2
+# 8    7    6    5    4    3    2    1    0     1
+# 9    8    7    6    5    4    3    2    1     0
+#
+# 3. Use a for loops to update the diagonal of the matrix with the elements 9 to 0.
+# 4. Create a new matrix `mat2` by converting the values in `mat` using `vectorised if`, setting numbers higher than 5 to `TRUE` and others to `FALSE`.
+# 5. Use a for loop to calculate the sum of rows and columns, and store them in the variables `row_sum1` and `col_sum1`.
+# 6. Use the `apply()` function to calculate the row sum and column sum, and store them in the variables `row_sum2`, `col_sum2`.
+#
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+mat=matrix(NA,10,10)
+mat
+## Do not modify this line! ## Write your code for 2. after this line! ##
+for(i in 1:10){
+	for(j in 1:10){
+		mat[i,j]=abs(j-i)
+	}
+}
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+for(i in 1:10){
+	mat[i,i]=10-i
+}
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+
+mat2=ifelse(mat>5,TRUE,FALSE)
+mat2
+## Do not modify this line! ## Write your code for 5. after this line! ##
+row_sum1=c(0)
+col_sum1=c(0)
+for(i in 1:10){
+	row_sum1[i]=sum(mat[i,])
+	col_sum1[i]=sum(mat[,i])
+}
+
+## Do not modify this line! ## Write your code for 6. after this line! ##
+row_sum2=apply(mat,1,sum)
+col_sum2=apply(mat,2,sum)
+```
+
+```{r}
+# HW2: Choices mtcars
+# 
+# 1. Load `mtcars` dataset and call it `df` (`df` should be a DataFrame object).
+#
+# 2. Select out column gear and save it as `gear`. Then replace values in `gear` from 3,4,5 to 'low gear', 'medium gear', 'high gear' respectively.
+#  (Note: You have to use `dplyr` package, please use `library(dplyr)` to import `dplyr` package.)
+#  (Hint: Look up `case_when` function from the dplyr package.)
+#
+# 3. Find the mean mpg (round to nearest integer) for cars in 'low gear', 'medium gear', 'high gear' and save as `m1`, `m2`, `m3` respectively.
+#
+# 4. Load `mtcars` dataset again but call it `new_df` this time (`new_df` should be a DataFrame object), replace the values in the mpg column with `m1`,`m2`,`m3` depending on its respectively gear category. (a 'low gear' car would have its mpg replaced by m1)
+
+
+
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+data(mtcars) 
+df=mtcars
+## Do not modify this line! ## Write your code for 2. after this line! ##
+gear=mtcars$gear
+library(dplyr)
+gear=case_when(gear==3~'low gear',gear==4~'medium gear',gear==5~'high gear')
+gear
+## Do not modify this line! ## Write your code for 3. after this line! ##
+m1=round(mean(mtcars$mpg[mtcars$gear==3]))
+m2=round(mean(mtcars$mpg[mtcars$gear==4]))
+m3=round(mean(mtcars$mpg[mtcars$gear==5]))
+## Do not modify this line! ## Write your code for 4. after this line! ##
+data(mtcars)
+new_df=mtcars
+new_df$mpg=case_when(new_df$gear==3~m1,new_df$gear==4~m2,new_df$gear==5~m3)
+new_df
+```
+
+```{r}
+# HW2: Compute polynomial
+#
+# Review: nth degree polynomial $f(x) = a_0 + a_1 x + ... + a_n x^n$, "where $a = (a_0, 1_a, ..., a_n)$ are the coefficients of the polynomial.
+#
+# 1. Calculate f(5) where $f(x) = 3 + 3 + 4 x + 5 x^2 + 6 x^3$ and store it into a variable `n1`.
+# 2. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`)
+#    Use `runif` function to randomly sample 11 numbers from uniform distribution U(1,10). Store the sample in vector `vec2`.
+#    Use a for loop to assign `n2` to the value of the 10th degree polynomial with coefficients `vec2` and evaluated at 3.
+# 3. Please write a function `polynomial(vec,x)` that evaluates the polynomial with coefficients `vec` at `x`.
+#    Note: The length of `vec` is not determined. You can assume the degree of the polynomial is length of vec - 1.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+f=function(x) {3+4*x+5*x^2+6*x^3}
+n1=f(5)
+#n1
+## Do not modify this line! ## Write your code for 2. after this line! ##
+set.seed(0)
+seed=.Random.seed
+vec2=runif(11,min=1,max=10)
+#vec2
+
+polynomial=function(vec,x){
+	z=vec[length(vec)]
+	for(i in (length(vec)-1):1){
+		z=z*x+vec[i]
+	}
+	return(z)
+}
+n2=polynomial(vec2,3)
+n2
+## Do not modify this line! ## Write your code for 3. after this line! ##
+
+```
+
+```{r}
+# HW2: Generate patterned matrix
+#
+# In this exercise, you will write functions to create matrices with indicated patterns.
+# Hint: You can create a zero matrix with required dimension first, then alter the matrix.
+#
+# 1. Write a function `matrix_1(d)` to return a d dimensional square matrix with following pattern:
+#    1 0 0 0 ... 0
+#    1 2 0 0 ... 0
+#    1 2 3 0 ... 0
+#    1 2 3 4 ... 0
+#    . . . . ... .
+#    1 2 3 4 ... d
+# 2. Write a function `matrix_2(d)` to return a d dimensional square matrix with following pattern:
+#    1 0 0 0  ... 0
+#    2 3 0 0  ... 0
+#    4 5 6 0  ... 0
+#    7 8 9 10 ... 0
+#    . . . .  ... .
+# 3. Write a function `matrix_3(d)` to return a d dimensional square matrix with following pattern:
+#    1    2    3    4     ... d
+#    2d   2d-1 2d-2 2d-3  ... d+1
+#    2d+1 2d+2 2d+3 2d+4  ... 3d
+#    .    .    .    .     ... .
+#    .    .    .    .     ... .
+# Note: d is a positive integer
+
+## Do not modify this line! ## Your code for 1.
+matrix_1 = function(d){
+	mtx=matrix(rep(c(1:d),d),d,d)
+    mtx[lower.tri(mtx)]=0
+	return(t(mtx))
+}
+a=matrix_1(4)
+a
+## Do not modify this line! ## Your code for 2.
+matrix_2=function(d){
+	mtx=matrix(0,d,d)
+	mtx[upper.tri(mtx,diag=TRUE)]=c(1:(d*(d+1)/2))
+	return(t(mtx))
+}
+b=matrix_2(5)
+
+## Do not modify this line! ## Your code for 3.
+matrix_3=function(d){
+	initial=seq.int(1,2*d-1,by = 2)
+	mtx=matrix(0,d,d)
+	mtx[1,]=c(1:d)
+	for(i in 2:d){
+		if(i%%2==0){	
+			mtx[i,]=mtx[(i-1),]+rev(initial)
+			}
+		else
+		{mtx[i,]=mtx[i-1,]+initial}
+	}
+	return(mtx)
+}
+matrix_3(4)
+```
+
+
+```{r}
+# HW2: Sorting
+#
+# In this exercise, we will write a function to sort the input vector.
+#
+# 1. Use a `for` loop to go over the `qsec` column in `mtcars` dataset and assign to integer `n1` the position of the smallest number.
+#    Note: if there are multiple smallest numbers, find the first occurrence.
+# 2. Write a function `min_position(vec)` to return the position of the first occurrence of the smallest number. You should not use the `min` or `which` functions.
+# 3. Write a function `my_sort(vec)` to return a sorted vector using the `min_position` function and a `while` loop. You should not use the `sort` or `order` functions.
+# 4. Apply the `my_sort` function to the `qsec` column in `mtcars` dataset and store the sorted vector in `vec1`
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+for(i in 1:length(mtcars$qsec)){
+	if(i==1){
+		mininum=mtcars$qsec[1]
+		n1=1
+	}
+	if(mininum>mtcars$qsec[i]){
+		mininum=mtcars$qsec[i]
+		n1=i
+	}
+}
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+min_position=function(vec){	
+	for(i in 1:length(vec)){
+		if(i==1){
+			m=vec[1]
+			position=1
+		}
+		if(m>vec[i]){
+			m=vec[i]
+			position=i
+		}		
+	}
+	return(position)
+}
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+my_sort=function(vec){
+	i=1
+	len=length(vec)
+	svector=rep(c(0),len)
+	while(i<=len){
+		svector[i]=vec[min_position(vec)]
+		vec=vec[-min_position(vec)]
+		i=i+1
+	}
+	return (svector)
+}
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+vec1=unlist(my_sort(mtcars$qsec))
+vec1
+#(unlist(mtcars$qsec))
+```
+
+```{r}
+# HW2: string problems
+#
+# 1. Create a function `string1` that takes as input a string `x` consisting of letters and numbers, such as '12345abcde',
+#    and splits each element, returning a character list. (Hint : Loop up the function `strsplit`)
+# 2. Create a function `string2` returning a character vector instead of a list.
+# 3. Create a function `string3` that takes as input a string `x` and two parameters `i` and `j`, selecting the ith and jth elements in the string and returning them as a character vector.
+#    If i > j, or if i or j individually do not correspond to an element of the list, `string3` returns `NA`, if i = j, it returns the ith element, and returns a character vector composed of the ith and jth element otherwise.
+# 4. Create a function `string4`, that takes as input a string `x` and two parameters `i` and `j` and returns the sub-string of x between the ith and jth elements included.
+#    It should return `NA` if `i` and `j` do not correspond to any element of the list.
+# 5. Create a function `string5`, that takes as input a string `x`, two parameters `i` and `j` and a logical parameter `decreasing`
+#    that returns the reversed sub-string `decreasing` is True, and the substring when `decreasing` is False.
+#    Example: `input(x = '12345abcde', i = 2, j = 7, decreasing = T)` should return 'ba5432'
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+string1=function(x){
+	return(strsplit(x,""))
+}
+
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+string2=function(x){
+	return(unlist(strsplit(x,"")))
+}
+## Do not modify this line! ## Write your code for 3. after this line! ##
+string3=function(x,i,j){
+	if(i>j){
+		return (NA)
+	}
+	
+	new_x=string2(x)
+	if(i>length(new_x)|j>length(new_x)){
+		return (NA)
+	}
+	if(i==j){
+		return(new_x[i])
+	}
+	else{return(c(new_x[i],new_x[j]))}
+}
+#string3('12345',2,3)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+string4=function(x,i,j){
+	sub_string=substr(x, start = i, stop = j)
+	if(length(string2(sub_string))){
+		return(sub_string)
+	}
+	else{return(NA)}
+}
+#string4('12345',2,1)
+## Do not modify this line! ## Write your code for 5. after this line! ##
+rev_string=function(x){
+	if(is.na(x)){
+		return (NA)
+	}
+	splits = strsplit(x,"")[[1]]
+    reversed = rev(splits)
+    final_result = paste(reversed, collapse = "")
+	return(final_result)
+}
+rev_string('124')
+string5=function(x,i,j,desc){
+	if(desc){
+		return(rev_string(string4(x,i,j)))
+	}
+	else{return(string4(x,i,j))}
+}
+string5(x = '12345abcde', i = 6, j = 4, desc = T)
+```
+
+
+```{r}
+# HW2: Swapping numbers in an array between every odd-even positional pairs.
+# (For instance: 345678 would be turned into 436587, 975467 would be turned into 794576)
+# (Note: Assume the array's length is even)
+# 
+# 1. Set the random seed to 2019 and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+set.seed(2019)
+seed=.Random.seed
+# 2. Create a vector called `num` of length 100 randomly sampled between digits 0-9 using function `sample`.
+num=sample(0:9,100,replace=TRUE)
+num
+# 3. Use a for loop to swap the digits between positions 1-2, 3-4, 5-6...99-100 and save as a new vector `new_num`.
+new_num=num
+for(i in 1:50){
+	temp=new_num[2*i]
+	new_num[2*i]=new_num[2*i-1]
+	new_num[2*i-1]=temp
+}
+new_num
+# 4. Now write a function named `swap` that takes in a vector set of digits and swap every odd-even positional pairs.
+#   (Note: the only argument should be the vector argument and it will have to pass through three test cases)
+#
+swap=function(x){
+	len=length(x)
+	if(len==0|len==1){
+		return(x)
+	}
+	else{
+		i=1
+		while(i<=len){
+			temp=x[i]
+			x[i]=x[i+1]
+			x[i+1]=temp
+			i=i+2
+		}
+		return(x)
+	}
+	
+}
+swap(c(1:10))
+```
+
+```{r}
+#' HW2: Apply with anonymous function.
+#'
+#' In this exercise, you will learn how to use an anonymous function in `apply()`.
+#'
+#' 1. Create an integer vector `v` with 1:25.
+#' 2. Convert the vector `v` to a 5x5 matrix `m`, the matrix should be filling by row.
+#' 3. Write a function `f` that computes the square of the mean of a given vector, for example `f(c(1,2,3)) = ((1+2+3)/3)^2 = 4`.
+#' 4. Use `apply()` to compute the sum of each row of `m` and store it in an integer vector `m_row_sum`.
+#' 5. Erase the function `f` (hint: use `rm`) and use `apply()` along with an equivalent but anonymous function
+#'  to compute the square of the mean of each of the columns of `m` and store the result in a vector `m_col`.
+#' @name hw2_apply_anonymous_fun
+NULL
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+v=c(1:25)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+m=matrix(v,5,5,byrow=TRUE)
+m
+## Do not modify this line! ## Write your code for 3. after this line! ##
+f=function(x){
+	return(mean(x)^2)
+}
+f(c(1,2,3))
+## Do not modify this line! ## Write your code for 4. after this line! ##
+m_row_sum=apply(m,1,sum)
+m_row_sum
+## Do not modify this line! ## Write your code for 5. after this line! ##
+rm(f)
+m_col=apply(m,2,function(i) mean(i)^2)
+			m_col
+```
+
+```{r}
+# HW2: Choice
+#
+# Instructions:
+# Create a function to do unit conversion between lb and kg. The function should have two arguments,
+# `mass` (first) and `unit` (second), where `mass` is a number and `unit` is a string in `"kg"`, `"lb"`.
+# Do not change the name and position of these two parameters.
+# For the purpose of exercise, 1 lb = 0.45 kg.
+# For example, the output of calling the function with `mass = 20, unit = "lb"` should be `20 * 0.45 = 9`,
+#              the output of `mass = 45, unit = "kg"` should be `45 / 0.45 = 100`.
+#
+# Problem:
+# 1. Write a function `f1` with such property using `if`,`else`.
+# 2. Write a function `f2` similar to `f1` but will raise `"Invalid Unit Error"`if neither `"kg", "lb"` is given (hint: look up the function `stop()`).
+# For example, the error message will be the following if `f2(15, "meter")` is inputed:
+# `Error in f2(15, "meter") : Invalid Unit`
+# 3. Write a function `f3` similar to `f2` but will raise `"Negative Mass Error"` if the `mass` is negative.
+# The negative mass error should be prior to the invalid unit error.
+# For instance, the error message will be the following if `f3(-3, "kg")` is inputed:
+# `Error in f3(-3, "kg") : Negative Mass Error`
+# Similarly, the error message will be the following if `f3(-3, "bananas")` is inputed:
+# `Error in f3(-3, "bananas") : Negative Mass Error`
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+f1=function(mass,unit){
+	if(unit=='kg'){
+		return(mass/0.45)
+	}
+	else if(unit=='lb'){
+		return(mass*0.45)
+	}
+}
+## Do not modify this line! ## Write your code for 2. after this line! ##
+f2=function(mass,unit){
+	if(unit=='kg'){
+		return(mass/0.45)
+	}
+	else if(unit=='lb'){
+		return(mass*0.45)
+	}
+	else{stop('Invalid Unit')}
+}
+#f2(15, "meter")		
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+f3=function(mass,unit){
+	if(mass<0){
+		stop('Negative Mass Error')
+	}
+	else if(unit=='kg'){
+		return(mass/0.45)
+	}
+	else if(unit=='lb'){
+		return(mass*0.45)
+	}
+	else{stop('Invalid Unit')}
+}
+```
+
+```{r}
+# HW2: choices2
+#
+# 1. Create a function `is_prime` that checks if an integer is a prime number or not,
+# `is_prime` takes one parameter named `num`, return `True` if `num` is a prime number, return `False` if it is composite.
+# 2. Use a `for` loop to create an integer vector `x`, containing the all prime numbers from 1 to 100.
+# 3. How many prime numbers are greater than 30 but less than 80? Save the answer into scalar `a`.
+# 4. Calculate the sum of the 2nd, 4th, 6th... prime number below 100. Save the anser into scalar `b`.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+is_prime=function(num){
+	if(num==0|num==1){return(FALSE)}
+	else if(num==2){return(TRUE)}
+	else if(num%%2==0) {return(FALSE)}
+	else{
+		i=2 
+		while(i^2 <= num){
+			if(num%%i==0) return(FALSE)
+			i=i+1
+			}
+		return(TRUE)		
+	}
+}
+is_prime(91)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+x=c(0)
+j=1
+	for(i in 1:100){
+		if(is_prime(i)){
+			x[j]=i
+			j=j+1
+		}
+	}
+x=as.integer(x)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+a=length(x[x>30&x<80])
+a
+## Do not modify this line! ## Write your code for 4. after this line! ##
+len=length(x)
+flag=seq(2,length(x),by=2)
+b=sum(x[flag])
+```
+
+```{r}
+# HW2: choices
+#
+# 1. Create an integer vector `x`, containing the numbers from 1 to 100.
+# 2. Use `vectorised if` to find numbers in `x` which are divisible by 3 and return a logical vector `r`.
+# 3. Calculate how many numbers are NOT divisible by 3 using the function `sum()`, and store it in the variable `n`.
+# 4. Convert vector `x` to vector `y`, using a for loop, following these conditions :
+#    if x is less than 20, change it to -1, if between 20 and 50 (inclusive) to 0, and if between 51 and 80 (inclusive) to 1, rest to NA.
+# 5. Apply `table()` function to find value counts of y and store into a table `z`.
+# 6. Apply `is.na()` to find how many NA exists in vector y, and assign this number to variable `num_NA`.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+x=as.integer(c(1:100))
+## Do not modify this line! ## Write your code for 2. after this line! ##
+r=ifelse(x%%3==0,TRUE,FALSE)
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+n=length(x)-sum(r)
+n
+## Do not modify this line! ## Write your code for 4. after this line! ##
+y=x
+for(i in 1:length(x)){
+	if(x[i]<20){y[i]=-1}
+	else if(x[i]<=50&x[i]>-20){y[i]=0}
+	else if(x[i]<=80&x[i]>=51){y[i]=1}
+	else{y[i]=NA}
+}
+y
+## Do not modify this line! ## Write your code for 5. after this line! ##
+z=table(y)
+	z
+## Do not modify this line! ## Write your code for 6. after this line! ##
+	num_NA=sum(is.na(y))
+```
+
+```{r}
+# HW2: Encrypt and Decrypt
+#
+# In this exercise, we will write functions to encrypt and decrypt strings that only consist of lower-case characters.
+#
+# 1. Use `seq_along` function to map the characters to their positions i.e. a -> 1, b -> 2, ..., z -> 26.
+#    Store the result into tibble `t1` with 2 columns: character and position. Each row contains a character and its position.
+#    Hint: You may use `letters` to obtain a vector of 26 characters.
+# 2. Use tibble `t1` to assign to `n1` the position of character `"n"`. Note: `n1` should be an integer instead of a list.
+# 3. Write a function `move(char,nstep=5)` that return the character that is `nstep` steps after the input character `char`.
+#    Note: When the position is larger than 26, start from the beginning i.e. 1.
+#    Example : both `move("a",nstep=1)` and `move("z",nstep=2)` should return character `"b"`.
+# 4. Use `strsplit` function to split the string "statistics" into characters and then apply the `move` function to move each element in the string by 5 steps using `sapply`. The result should be stored into a vector `v1`.
+# 5. Write a function `encrypt(str,nstep)`. This function returns a string that each element is moved _nstep_ steps by using `move` function.
+# 6. Write a function `decrypt(str,nstep)` to decrypt the string generated by `encrypt` function.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+library(tibble)
+t1=tibble(character=letters[1:26],position=1:26)
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+n1=match('n',t1$character)
+
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+move=function(char,nstep=5){
+  n1=match(char,t1$character)
+  n2=(n1+nstep)%%26
+  print(n2)
+  if(n2==0){return(t1$character[26])}
+  else{return(t1$character[n2])}
+}
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+v1=c(sapply(unlist(strsplit('statistics','')),move))
+v1
+
+## Do not modify this line! ## Write your code for 5. after this line! ##
+encrypt=function(str,nstep){
+	return (paste(c(mapply(move,unlist(strsplit(str,"")),nstep)),collapse=""))
+}
+a=encrypt('palhmaljq',3)
+a
+
+## Do not modify this line! ## Write your code for 6. after this line! ##
+decrypt=function(str,nstep){
+	return (paste(c(mapply(move,unlist(strsplit(str,"")),-nstep)),collapse=""))
+}
+decrypt(a,3)
+```
+
+
+```{r}
+# HW2: Compute factorial
+#
+# Review: factorial of n is equal to n x (n-1) x ... x 1.
+#
+# 1. Please write a function `my_factorial(n)` to compute factorial of n.
+#    If the input `n` is a positive integer, this function returns factorial of `n`. Otherwise, this function should return `NA`.
+#    Please use `if` and `else` inside your function to judge whether it should return `NA` or not.
+#    Please write a recursive function i.e. this function calls itself inside the body.
+#    Note: DO NOT use `factorial` function from the base package.
+# 2. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`)
+#    Then use `sample` function to randomly sample 50 integers from 1 to 100 without replacement. Store the result in vector `vec1`.
+# 3. Use `sapply` to compute the factorial for each element in `vec1` with the help of the function `factorial` you just wrote. Store the result in a vector `vec2`.
+#    Hint: `sapply` is similar to `lappy`. It will return a vector whenever possible. You can use `?sapply` to see documentation.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+my_factorial=function(n){
+	if(n>0){
+		if(n==1){
+			return(1)
+		}
+		else{
+			while(n-1>=1){
+			m=n-1
+		   return((n)*my_factorial(m))
+			}
+		}
+	}
+	else{return(NA)}
+}
+a=my_factorial(2)
+a
+## Do not modify this line! ## Write your code for 2. after this line! ##
+set.seed(0)
+seed=.Random.seed
+vec1=sample(1:100,50)
+vec1
+## Do not modify this line! ## Write your code for 3. after this line! ##
+vec2=sapply(vec1,my_factorial)
+```
+
+```{r}
+# HW2: function
+#
+# 1. Create a function `f` that takes two positive integers `m` and `n` as input,
+#    output a named list including the quotient `q` and the reminder `r`, such that `m = qn + r` if `m` is greater than `n`,
+#    or `n = qm +r` if `n` is greater than `m`.
+# 2. Create a function `gcd` that takes two positive integers `m` and `n` as input,
+#    output their greatest common divisor. The function must include a `while` loop (hint: use Euclid algorithm).
+# 3. Create a function `co_prime` that takes two positive integers `m` and `n` as input,
+#    and output whether they are coprime numbers or not, return `TRUE` if they are coprime,
+#    return `FALSE` if they have common divisors. For example: `co_prime(3,6) = FALSE`, `co_prime(20,9) = TRUE`
+#    (hint: use the function defined previously).
+# 4. Create a function `lcm` that takes two positive integers `m` and `n` as input,
+#    output their lowest common multiple. (hint: use the function defined previously).
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+f=function(m,n){
+	if(m>n){
+		r=m%%n
+		q=(m-r)/n
+	}
+	else if(m<n){
+		r=n%%m
+		q=(n-r)/m
+	}
+	return(list('q'=q,'r'=r))
+}
+f(1,3)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+gcd=function(m,n){
+	if(m<n){
+		temp=m
+		m=n
+		n=temp
+	}
+	while(n){
+		temp=f(m,n)
+		m=n
+		n=temp$r
+	}
+	return(m)
+}
+gcd(1,3)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+co_prime=function(m,n){
+	if(gcd(m,n)==1){return (TRUE)}
+	else{return (FALSE)}
+}
+#co_prime(3,6)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+lcm=function(m,n){
+	lcm = (m*n)/gcd(m,n)
+}
+a=lcm(3,1)
+a
+```
+
+```{r}
+# HW2: function2
+#
+# 1. Create a function `f1` that takes an input vector `v` and an integer `a`, and returns `TRUE` if `a` appears in `v`, otherwise `FALSE`.
+#    The answer should include a `for` loop.
+# 2. Create a function `f2` that takes an input vector `v` and an integer `a`, and returns how many times `a` appears in `v`,
+#    if `a` does not appear in `v`, return `0`. The answer should include a `for` loop.
+# 3. Create a function `f3` that takes an input vector `v` and an integer `a`, and returns where does `a` appear in `v`.
+#    For example `f3(v = c(1,1,2,3,1,5), a = 1) = c(1,2,5)`. if `a` does not appear in `v`, return `NULL`. The answer should include a `for` loop.
+# 4. Create a function `f4` that takes an input vector `v` and an integer `a`, and returns the `TRUE` if there are two numbers in `v` sum up to `a`, otherwise `FALSE`.
+#    For example, `f4(v = c(1,4,9,5,15), a = 10) = TRUE`, because `1 + 9 = 10`. The answer should include a `for` loop.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+f1=function(v,a){
+	for(i in 1:length(v)){
+		if(v[i]==a){return(TRUE)}
+	}
+	return(FALSE)
+}
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+f2=function(v,a){
+	count=0
+	for(i in 1:length(v)){
+		if(v[i]==a){count=count+1}
+	}
+	return(count)
+}
+## Do not modify this line! ## Write your code for 3. after this line! ##
+f3=function(v,a){
+	position=c(0)
+	count=0
+	for(i in 1:length(v)){
+		if(v[i]==a){
+			count=count+1
+			position[count]=i
+		}
+	}
+	if(count==0){return(NULL)}
+	else{return(position)}
+}
+## Do not modify this line! ## Write your code for 4. after this line! ##
+f4=function(v,a){
+	for(i in 1:(length(v)-1)){
+		
+		for(j in (i+1):length(v)){
+			
+			if( (v[i]+v[j])==a ){	
+				#print(i)
+				return(TRUE)
+			}
+		}
+	}
+	#print(i,j)
+	return(FALSE)
+}
+f4(v = c(1,4,9,5,15), a = 2)
+```
+

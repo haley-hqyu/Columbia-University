@@ -1,0 +1,532 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Huiqian Yu
+---
+
+HW 1 for SCIDS 
+```{r}
+# HW 1: vector1
+#
+# 1. Create a vector `v1` that will contain integers from -30 to 60.
+# 2. Copy `v1` into a vector `v2` and add names 'odd' or 'even' based on the value.
+# 3. Copy `v1` into a vector `v3` and if the number can be divided by 3, replace it by 'NA'.
+# 4. Assign the mean of `v3` to `v4` ignoring the 'NA'.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+v1=c(-30:60)
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+v2=v1
+vector_name=sapply(1:length(v1),function(i) if(v1[i]%%2==0){'even'} else{'odd'})
+names(v2)=vector_name
+v2
+## Do not modify this line! ## Write your code for 3. after this line! ##
+v3=c(sapply(1:length(v1),function(i) if(v1[i]%%3==0){NA} else{v1[i]}))
+v3		  
+## Do not modify this line! ## Write your code for 4. after this line! ##
+v4=mean(v3,na.rm=TRUE)
+```
+
+```{r}
+# HW1: matrix2
+#
+# 1. Create a 10 x 10 matrix `m1` whose i-th row,j-th column element is (i+1)/(j+1). (hint: check the `outer`` function)
+# 2. Copy `m1` into a matrix `m2` and replace the non-integer value by 0.
+# 3. Flatten the matrix `m2` row-vise and assign it to `v1`.
+# 4. Copy `v1` to `v2`, remove the duplicated value and sort it in decreasing order. (hint: check the `unique` function)
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+v1=c(1:10)
+v2=c(1:10)
+m1=outer(v1+1,1/(v2+1))
+#m1
+## Do not modify this line! ## Write your code for 2. after this line! ##
+
+m2=m1
+
+for(i in 1:10){
+	
+	for (j in 1:10){
+		if (trunc(m2[i,j])!=m2[i,j]){
+			m2[i,j]=0
+			}	
+   }
+}
+m2
+## Do not modify this line! ## Write your code for 3. after this line! ##
+v1=as.vector(t(m2))
+## Do not modify this line! ## Write your code for 4. after this line! ##
+v2=sort(unique(v1),decreasing=TRUE)
+```
+
+```{r}
+# HW1: matrix3
+#
+# 1. Set the random seed as 5206. (hint: check the set.seed function)
+#    Save the random seed vector to `seed`.(hint: use the command seed <- .Random.seed)
+# 2. Create a vector `v1` of length 30 by sampling from 1 to 30 without replacement.(hint: check the sample function)
+# 3. Convert the vector `v1` into a 5 x 6 matrix `m1` filled by row.
+# 4. Calculate the L-1 norm of matrix `m1` defined as the the maximum absolute column sum of the matrix and assign it to `n1`.
+# 5. Calculate the L-infinity norm of matrix `m1` defined as the maximum absolute row sum of the matrix and assign it to `n2`.
+# 6. Calculate the Frobenius norm of matrix `m1` defined as the square root of the sum of the squares of its elements and assign it to `n3`.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+set.seed(5206)
+seed <- .Random.seed
+## Do not modify this line! ## Write your code for 2. after this line! ##
+v1=sample(1:30)
+v1
+## Do not modify this line! ## Write your code for 3. after this line! ##
+m1=matrix(v1,5,6,byrow=TRUE)
+m1
+## Do not modify this line! ## Write your code for 4. after this line! ##
+n1=max(apply(abs(m1),2,sum))
+n1
+## Do not modify this line! ## Write your code for 5. after this line! ##
+n2=max(apply(abs(m1),1,sum))
+## Do not modify this line! ## Write your code for 6. after this line! ##
+n3=sqrt(sum(m1^2))
+```
+
+```{r}
+# HW1: outer product
+#
+# 1. Create vector `v` containing numbers 1 to 7.
+# 2. Create matrix `outer_prod1` which is the outer product of `v`.
+# 3. Copy `outer_prod1` to `outer_prod2` and change the sign of the lower triangular part of `outer_prod2` from + to -.
+# 4. Convert `outer_prod2` to a tibble `t1`.
+# 5. Rename columns of `t1` as the first 7 letters of the alphabet.
+# 6. Copy `t1` into `t2` and remove the columns 'd' of `t2`.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+v=c(1:7)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+outer_prod1=outer(v,v)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+outer_prod2=outer_prod1
+for(i in 1:dim(outer_prod2)[1]){
+	for(j in 1:dim(outer_prod2)[2]){
+		if(i>j){
+			outer_prod2[i,j]=-outer_prod2[i,j]
+		}
+	}
+}
+outer_prod2
+## Do not modify this line! ## Write your code for 4. after this line! ##
+library(dplyr)
+t1=as_tibble(outer_prod2,.name_repair = "unique")
+t1
+## Do not modify this line! ## Write your code for 5. after this line! ##
+names(t1)=letters[1:7]
+t1
+## Do not modify this line! ## Write your code for 6. after this line! ##
+t2=select(t1,-c('d'))
+```
+
+```{r}
+# HW1: linear algebra
+#
+# 1. Assign to `a` a 3x3 matrix filled by row with numbers between 1 and 9.
+# 2. Assign to `ca` the matrix corresponding to the upper triangulart of the cholesky decomposition of `a`.
+# In other words, find `ca` such that `t(ca) %*% ca = a`. (hint: look at the function `chol`)
+# 3. Assign to `eva` the first eigenvector of `a`. (hint: look at the function `eigen`)
+# 4. Assign to `iea` the inverse of the matrix composed of the eigenvectors of `a` (hint: look at the function `solve`)
+# 5. Assign to `ra` the rank of `a`. (hint: look at the function `qr`)
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+a=matrix(c(1:9),3,3,byrow=TRUE)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+ca1=chol(a,pivot=TRUE)
+pivot=attr(ca1,'pivot')
+order=order(pivot)
+ca=ca1[,order]
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+eva=eigen(a)$vectors[,1]
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+iea=solve(eigen(a)$vectors)
+## Do not modify this line! ## Write your code for 5. after this line! ##
+ra = qr(a)$rank
+```
+
+```{r}
+# HW1: tibble4
+#
+# 1. Consider the data frame `airquality`. Convert it into a tibble `t1`.
+# 2. Calculate the total number of 'NA' for each variable and summarize it into a vector `v1`.
+#    Make sure the vector has the same names as the column names of `t1`.
+# 3. Omit all rows which have 'NA' values and assign it to `t2`.
+# 4. Sort the new data frame `t2` by column Temp(ascending) and then by column Ozone(ascending). Assign it to `t3`.(hint: check the order function)
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+library(tibble)
+library(dplyr)
+t1=as_tibble(airquality)
+t1
+## Do not modify this line! ## Write your code for 2. after this line! ##
+v1=sapply(t1, function(x) sum(is.na(x)))
+## Do not modify this line! ## Write your code for 3. after this line! ##
+t2=na.omit(t1)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+t3=t2[order(t2$Temp,t2$Ozone),]#,decreasing=FALSE,method='Ozone')
+t3
+```
+
+```{r}
+# HW1: data frames and tibbles
+#
+# 1. Convert the dataset `mtcars` to a tibble `t1`.
+# 2. Create a tibble `t2` which contains all columns of `t1` with a miles per gallon higher than 18.
+# 3. Create a tibble `t3` that contains all the values of `t2` truncated to the corresponding integer.
+# 4. Copy `t3` into a tibble `t4` and merge its two columns 'vs' and 'am' by summing them, rename it 'vsam' and make sure it is `t4`'s first column.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+#data(mtcars)
+library(tibble)
+t1=as_tibble(mtcars)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+t2=t1[t1$mpg>18,]
+## Do not modify this line! ## Write your code for 3. after this line! ##
+t3<-trunc(t2)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+vsam=t3$vs+t3$am
+t4=as_tibble(cbind(vsam,t3))
+t4
+```
+
+```{r}
+# HW1: tibble ordering
+#
+# 1. Convert the dataset `mtcars` to a tibble `t1`.
+# 2. Copy `t1` into a tibble `t2` and delete the columns 'drat' and 'am'.
+# 3. Copy `t2` into a tibble `t3` and permute the column 'mpg' and 'qsec' (hint : you might want to use the function `which`).
+# 4. Select the 10 rows of `t3` with lowest 'qsec' and copy them into a tibble `t4` in increasing order.
+library(tibble)
+library(dplyr)
+## Do not modify this line! ## Write your code for 1. after this line! ##
+t1=as_tibble(mtcars)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+t2=select(t1,-c('drat','am'))
+## Do not modify this line! ## Write your code for 3. after this line! ##
+col_name=colnames(t2)
+col_name[which(col_name=='qsec')]='test'
+col_name[which(col_name=='mpg')]='qsec'
+col_name[which(col_name=='test')]='mpg'
+#arrange.vars(t3, c('qseec'= which(colnames(t2)=='mpg'), 'mpg'=which(colnames(t2)=='qsec')))
+t3=select(t2,col_name)
+t3
+## Do not modify this line! ## Write your code for 4. after this line! ##
+t4=(t3%>%arrange(qsec))[1:10,]
+t4
+```
+
+```{r}
+<-# HW1: array5
+#
+# 1. Create a 10 x 10 matrix `m1` such that the i-th row j-th column element is the max(i,j).
+# 2. Create a 10 x 10 matrix `m2` such that the i-th row j-th column element is the min(i,j).
+# 3. Combine `m1` as the first slice and `m2` as the second slice to a 10 x 10 x 2 array `a1`.
+# 4. Turn the array `a1` into a 10 x 2 matrix `m3` by summing over the second dimension.
+#   (hint: you can calculate directly from `m1` and `m2` or use the function apply)
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+m1 <- matrix(0, nrow=10, ncol=10, byrow=TRUE)
+for (i in 1:10){
+	for (j in 1:10){
+		m1[i,j]<-max(i,j)
+	}
+}
+
+## Do not modify this line! ## Write your code for 2. after this line! ##
+m2 <- matrix(0, nrow=10, ncol=10, byrow=TRUE)
+for (i in 1:10){
+	for (j in 1:10){
+		m2[i,j]<-min(i,j)
+	}
+}
+## Do not modify this line! ## Write your code for 3. after this line! ##
+
+a1=array(c(m1,m2),dim=c(10,10,2))
+a1
+m3=cbind(rowSums(m1),rowSums(m2))
+m3
+```
+
+```{r}
+# HW1: list6
+#
+# 1. Create a list `l1` consist of 26 components from 'a' to 'z'. (hint: check the variable letters)
+# 2. Create a list `l2` consist of 26 components from 1 to 26.
+# 3. Combine `l1` and `l2` to a new list `l3`. `l3` has 2 elements as `l1` and `l2`.
+# 4. Combine `l1` and `l2` to a new list `l4`. `l4` has 52 elements as the elements of `l1` and `l2`.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+l1=as.list(letters[1:26])
+length(l1)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+l2=as.list(c(1:26))
+## Do not modify this line! ## Write your code for 3. after this line! ##
+l3=list(l1,l2)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+l4=as.list(c(l1,l2))
+```
+
+```{r}
+# HW1: list7
+#
+# 1. Create a list `l1` consist of 52 components from 'a' to 'z' and 'A' to 'Z'. (hint: check variables letters and LETTERS)
+# 2. Convert the list `l1` into a 13 x 4 matrix `l2` filling by column.
+# 3. Convert the list `l1` into a vector `x1`.
+# 4. Convert the list `l1` into an atomic vector `x2`. (hint: `x1` should be different with `x2`)
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+l1=as.list(cbind(letters[1:26],LETTERS[1:26]))
+## Do not modify this line! ## Write your code for 2. after this line! ##
+l2=matrix(l1,13,4)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+x1=as.vector(l1)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+x2=unlist(l1)
+x2
+```
+
+```{r}
+# HW1: factor8
+#
+# 1. Create an ordered factor `f1` consist of letters 'a' to 'z' ordered alphabetically.
+# 2. Create an ordered factor `f2` consist of letters 'a' to 'z' in descending alphabetical order.
+# 3. Create a 30 elements, ordered factor `f3` consist of letters 'a' to 'z' followed by 4 NA. The order of `f3` is 'a'<...<'z'<NA.
+# 4. Delete the element 'c' with the level 'c' and assign it to `f4`.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+f1=factor(letters[],ordered=TRUE)
+#f1
+## Do not modify this line! ## Write your code for 2. after this line! ##
+f2=factor(letters[1:26],levels=c(letters[26:1]),ordered=TRUE)
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+f3=factor(c(letters[1:26],NA*c(1:4)),levels=c(letters[1:26]),ordered=TRUE)
+f3=addNA(f3)
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+f4=droplevels(f3[! f3 %in% c('c')],'c')
+```
+
+```{r}
+# HW1: factors
+#
+# 1. Create two factors `f1` and `f2` containing the numbers from 1 to 100 included, and 1 to 20 included.
+# 2. Concatenate these two factors in a factor `f3`.
+# 3. Create a table `t1` giving the number of times each number appear in `f3`.
+# 4. Copy `f1` into a factor `f4` and rearrange it in decreasing order. (hint: make sure its levels are in decreased order too. You might want to look up the function `rev()`)
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+f1=factor(c(1:100))
+f2=factor(c(1:20))
+## Do not modify this line! ## Write your code for 2. after this line! ##
+temp=c(f1,f2)
+f3=factor(temp)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+t1=table(f3)
+#t1
+## Do not modify this line! ## Write your code for 4. after this line! ##
+f4=factor(rev(f1),levels=rev(levels(f1)))
+f4
+```
+
+```{r}
+# HW1: missing values
+#
+# 1. Set the random seed to zero (The code won't pass the test if you don't!) and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+# 2. Load `mtcars` and transform it into a tibble called `mtcars_tibble`.
+# 3. Select randomly 1 row and 5 columns and store their corresponding numbers into two vectors `list_row` (containing 1 number) and `list_col` (containing 5 numbers). (hint: look at the command `sample`)
+# 4. Copy `mtcars_tibble` into `mtcars_tibble_missing` and replace its corresponding values by missing values.
+# 5. Create a vector `mean_mtcars` containing the means of each column of `mtcars_tibble`.
+# 6. Copy `mtcars_tibble_missing` into `mtcars_bis` and replace the missing values of `mtcars_bis` by the means of the corresponding columns.
+# 7. Copy `mtcars_bis` into a tibble `mtcars_rounded` and make sure that its column 'gear' contains only integers by rounding its values to the closest integer.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+set.seed(0)
+seed=.Random.seed
+## Do not modify this line! ## Write your code for 2. after this line! ##
+library(tibble)
+mtcars_tibble=as_tibble(mtcars)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+library(dplyr)
+list_row=sample(1:32,1,replace=F)
+
+list_col=sample(1:11,5,replace=F)
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+mtcars_tibble_missing=mtcars_tibble
+mtcars_tibble_missing[list_row,list_col]=NA
+## Do not modify this line! ## Write your code for 5. after this line! ##
+mean_mtcars=as.numeric(colMeans(mtcars_tibble))
+## Do not modify this line! ## Write your code for 6. after this line! ##
+mtcars_bis=mtcars_tibble_missing
+mtcars_bis=mtcars_bis%>%replace(is.na(.),mean_mtcars[sort(list_col)])
+mtcars_bis[14,]
+
+
+## Do not modify this line! ## Write your code for 7. after this line! ##
+mtcars_rounded=mtcars_bis
+#mtcars_rounded$gear=round(mtcars_rounded$gear)
+
+```
+
+```{r}
+# HW1: type_conversions
+#
+# 1. Create a list `l` containing :
+#       - a vector containing the first 20 numbers in increasing order,
+#       - a vector containing the first 20 numbers in decreasing order,
+#       - a list of 2 'a' and 2 'b' repeated 5 times (hint : lookup the function `rep()`).
+# 2. Convert `l` to a tibble t1 of dimension 20 x 3
+# 3. Rename the columns of the tibble `t1` to ('X1', 'X2', 'letters').
+# 4. Copy `t1` into a tibble `t2` and delete the rows of `t2` with letter 'b'.
+# 5. Create a matrix `m` containing the first two columns of `t2`
+# 6. Compute the product `m_prod` of `m` and its transpose.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+l1=c(1:20)
+l2=c(20:1)
+x=c('a','a','b','b')
+l3=rep(x,5)
+l=list(l1,l2,l3)
+## Do not modify this line! ## Write your code for 2. after this line! ##
+library(tibble)
+library(dplyr)
+t1=as_tibble(l,20,3)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+names(t1)= c('X1', 'X2', 'letters')
+## Do not modify this line! ## Write your code for 4. after this line! ##
+t2=subset(t1, letters!= 'b')
+## Do not modify this line! ## Write your code for 5. after this line! ##
+m=data.matrix(t2[1:2])
+## Do not modify this line! ## Write your code for 6. after this line! ##
+m_prod=m%*%t(m)
+```
+
+```{r}
+# HW1: random order
+#
+# 1. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+# 2. Create a vector `random_seq` of 200 random numbers, selected between 1 and 10 included.
+# 3. Create a factor `random_factor` containing the sequence and the corresponding levels 1 to 10.
+# 4. Create a table `tab` that gives the number of appearance of each number in the sequence.
+# 5. Create a vector `random_order` containing the numbers 1 to 10 in increasing number of appearance in `random_seq`.
+# 6. Create a vector `top3` containing the 3 numbers appearing the most often in decreasing order.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+set.seed(0)
+seed=.Random.seed
+## Do not modify this line! ## Write your code for 2. after this line! ##
+random_seq=sample(1:10,200,replace=T)
+
+## Do not modify this line! ## Write your code for 3. after this line! ##
+random_factor=factor(random_seq,levels=1:10)
+
+## Do not modify this line! ## Write your code for 4. after this line! ##
+tab=table(random_factor)
+
+## Do not modify this line! ## Write your code for 5. after this line! ##
+random_order= order(table(random_seq))
+
+## Do not modify this line! ## Write your code for 6. after this line! ##
+top3=rev(random_order)[1:3]
+top3
+```
+
+```{r}
+# HW1: simple probabilities
+#
+# Estimate the probability to have 5 'heads' in a row
+#
+# 1. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+# 2. Create a vector `random_seq` of n = 50000 random numbers equal to 0 ('heads') or 1 ('tails').
+# 3. Reshape `random_seq` into a matrice `random_mat` of shape 5 x 10000.
+# 4. Sum `random_mat` over its rows, to get a vector `random_sum`. (hint : check the functions `rowSums` and `colSums`).
+# 5. Assign to a variable `prob` the number of elements of `random_sum` equal to 0 and divide it by 10000. You get an estimate of the probability of having 5 heads in a row!
+#    For higher n, you will get even better estimates. Try different values of n to see how prob evolves, but make sure that your final solution uses 50000.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+set.seed(0)
+seed=.Random.seed
+## Do not modify this line! ## Write your code for 2. after this line! ##
+random_seq=sample(0:1,50000,replace=T)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+random_mat=matrix(random_seq,5,10000)
+## Do not modify this line! ## Write your code for 4. after this line! ##
+random_sum=colSums(random_mat)
+## Do not modify this line! ## Write your code for 5. after this line! ##
+prob=sum(random_sum==0)/10000
+prob
+```
+
+```{r}
+# HW1: sampling
+#
+# In this exercise, you'll compute the probability of getting a double six exactly three times in a row when throwing consecutive six faced dices.
+# While it could be solved by hand, the goal is to learn how to use sampling.
+#
+# 1. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+# 2. Assign to `sample_space` a data frame with 36 rows and columns named `dice1` and `dice2`.
+# Each row should contain a different combination of the results for the two dices, e.g. the first row is (1, 1), the second row is (2, 1), ... up to (6, 6).
+# (Hint: look at the function `expand.grid`)
+# 3. Assign to `sampled_rows` a vector of 100'000 uniformly sampled numbers between 1 and 36.
+# (Hint: look at the functions `sample` and  `sample.int`)
+# 4. Assign to `sampled_events` the data frame obtained by selecting the 100'000 rows in `sampled_rows` from the `sample_space` data frame.
+# 5. Assign to `double_six` a `logical` vector of dimension 100'000 where each element is `TRUE`
+# if the corresonding row of `sampled_events` is a double six and `FALSE` otherwise.
+# 6. Assign to `double_six_run_length` an `integer` vector corresponding to the length of each run of double six.
+# (Hint: look at the function `rle`)
+# 7. Assign to `probability` the probability to obtain a double six exactly two times in a row
+# by counting the number of times such an event happens in `double_six` and dividing by 100'000.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+set.seed(0)
+seed=.Random.seed
+## Do not modify this line! ## Write your code for 2. after this line! ##
+sample_space=data.frame(expand.grid(dice1=seq(1:6),dice2=seq(1:6)))
+## Do not modify this line! ## Write your code for 3. after this line! ##
+sampled_rows=c(sample.int(36,100000,replace=T))
+## Do not modify this line! ## Write your code for 4. after this line! ##
+sampled_events=sample_space[sampled_rows,]
+
+## Do not modify this line! ## Write your code for 5. after this line! ##
+
+double_six=as.vector(apply(sampled_events,1,function(x) x[1]==6&x[2]==6))
+## Do not modify this line! ## Write your code for 6. after this line! ##
+double_six_run_length=rle(double_six)
+double_six_run_length=double_six_run_length$lengths[double_six_run_length$values==TRUE]
+                           
+## Do not modify this line! ## Write your code for 7. after this line! ##
+probability=sum(double_six_run_length==2)/100000
+						   probability
+```
+
+```{r}
+# HW1: distributions
+#
+# In this exercise, you'll learn how to work with distributions in R.
+#
+# 0. Read the documentation regarding distributions, which you can access using `?Distributions`.
+# 1. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+# 2. Assign to a variable `prob1` the probability that 5 students in the class have the same birthday. (hint: as of the writing of this exercise, there are 285 registered students)
+# 3. Let X have a normal distribution with a mean of 0 and a variance of 2. Assign to a variable `prob2` the probability that X is betwee 0 and 3.
+# 4. Let Y have an exponential distribution with mean equal to 3. Assign to `sample_exp` a sample of 10 random variates drawn from the distribution of Y.
+
+## Do not modify this line! ## Write your code for 1. after this line! ##
+set.seed(0)
+seed=.Random.seed
+## Do not modify this line! ## Write your code for 2. after this line! ##
+prob1=pbirthday(285, classes = 365, coincident = 5)
+## Do not modify this line! ## Write your code for 3. after this line! ##
+prob2=(pnorm(3, 0, sqrt(2))-pnorm(0, 0, sqrt(2)))
+## Do not modify this line! ## Write your code for 4. after this line! ##
+sample_exp=rexp(10,1/3)
+```
+
+

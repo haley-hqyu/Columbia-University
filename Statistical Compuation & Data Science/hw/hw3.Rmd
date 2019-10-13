@@ -1,0 +1,715 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Huiqian Yu
+---
+
+HW3 for SCIDS
+
+```{r}
+#' HW2: triple_dot
+#'
+#' This exercise is to help you understand `...` arguments in function (Advanced R Ch6.6).
+#'
+#' 1. Create a function `f1` with an argument arg so that `f1(name)` will print some fixed message followed by the content of `name`.
+#' For instance, `f1(name = "Bob")` will print
+#' Hello Bob!
+#' Notes: punctuation mark after the name(Bob here).
+#' Hint: try `cat()`and`paste0(xxx,"!\n")`.
+#'
+## Do not modify this line!
+f1=function(name){
+	cat(paste0("Hello ",name,"!\n"))
+}
+
+
+#' 2. Create a function `f2(places)` so that the result of `f2(place)` are the following:
+#' `f2("Columbia")` will output
+#' From Columbia
+#' `f2(c("Columbia", "MIT"))` will output
+#' From Columbia and MIT
+#' `f2(c("Columbia", "MIT", "Harvard"))` will output
+#' From Columbia, MIT and Harvard
+#' `f2(c("Columbia", "MIT", "Harvard", "Berkeley"))` will output
+#' From Columbia, MIT, Harvard and Berkeley
+#' Notes:
+#' 1) Take care of the space ' ' and comma ','.
+#' 2) The length of input will exceed 4.
+#' Hints:
+#' 1) You need to consider the length of `places` (1, 2, >=3).
+#' 2) If `msg = 'From'` then try something like `msg <- paste0(msg, collapse = ", ")` of course, you need some modification :).
+#' 3) You can retrieve `'MIT'` like `places[2]` if `places = c("Columbia", "MIT", "Harvard", "Berkeley")`.
+#'
+#'
+## Do not modify this line!
+f2=function(places){
+	n = length(places)
+	msg = "From"
+	if(n==1){
+		cat(paste(msg,places[1]))
+	}
+	else if(n==2) {
+		cat(paste(paste(msg,places[1]),"and",places[2]))
+	}
+	else{
+		cat(paste(msg,paste(places[1:(n-1)],collapse=", "),"and",places[n]))
+	}
+}
+#f2(c("a","b","c"))
+
+#' 3. Create a function `f3` with `...` argument,i.e.`f3(...)` , so that
+#' `f3()` will output nothing while `f3(places)` is the same as `f2(places)`.
+#' Hint: try `mising(...)` and `unlist(list(...))`.
+#'
+## Do not modify this line!
+f3=function(...){
+	if(missing(...)==TRUE){
+	}
+	else{
+		f2(...)
+	}
+}
+
+#' 4.Let's combine everything together.
+#' Create `f4(name, ...)` so that
+#' `f4("Bob")` will print the same is `f1("Bob")`
+#' `f4(name, places)` will print have two lines' output
+#' The first line will be the same as `f1("Bob")`
+#' The second line will be the same as `f3(places)`
+#' For example
+#' `f4("Bob", "Columbia", "MIT", "Berkeley")`
+#' Hello Bob!
+#' From Columbia, MIT and Berkeley
+#' Hint: try to make use of the functions you made above.
+#'
+## Do not modify this line!
+
+f4=function(name,...){
+	f1(name)
+	if(missing(...)==TRUE){
+	}
+	else{
+		f2(...)
+	}
+}
+f4("Bob")```
+```
+
+
+```{r}
+#' HW3: Bisection.
+#'
+#' In this exercise, you will implement a functional on your own: a root-finding algorithm called the bisection method.
+#' For details, check the wikipedia page for 'Bisection Method': https://en.wikipedia.org/wiki/Bisection_method
+#'
+#' 1. Implement the bisection method using iteration and the scaffold given below.
+#'    Argument `f` is the function of which we want to find the root.
+#'    Argument `a` and `b` are two evaluated points.
+#'    Argument `n` is the max number of iterations.
+#'    Argument `tol` is the desired tolerence.
+## Do not modify this line!
+
+bisection <- function(f, a, b, n = 1000, tol = 1e-7) {
+  for (i in 1:n) {
+    # Calculate midpoint
+    midpoint = (a+b)/2
+    # If the function equals 0 at the midpoint or the midpoint is below the desired tolerance, stop the
+    # function and return the root.
+    if(f(midpoint)==0 |abs(b-a)<tol){
+      return(midpoint)
+    }
+    # If another iteration is required,
+    # check the signs of the function at the points c and a and reassign
+    # a or b accordingly as the midpoint to be used in the next iteration.
+    if(f(midpoint)*f(a)<0){
+      b=midpoint
+    }
+    if(f(midpoint)*f(b)<0){
+      a=midpoint
+    } 
+  }
+}
+
+#' 2. Modify the function `bisection` such that if the signs of the function at the evaluated points are the same, throw an error with message
+#'    `"The signs of f evaluated at the endpoints are the same."`.
+#'    Also if the max number of iterations is reached and no root has been found, throw an error with message `"Max number of iterations reached."`.
+## Do not modify this line!
+
+bisection <- function(f, a, b, n = 1000, tol = 1e-7) {
+  # If the signs of the function at the evaluated points, a and b, are the same, throw an error.
+  if(f(a)*f(b)>0){
+    stop("The signs of f evaluated at the endpoints are the same.")
+  }
+  for (i in 1:n) {
+    # Calculate midpoint
+    midpoint = (a+b)/2
+    # If the function equals 0 at the midpoint or the midpoint is below the desired tolerance, stop the
+    # function and return the root.
+     if(f(midpoint)==0|abs(b-a)<tol){
+      return(midpoint)
+    }   
+    # If another iteration is required,
+    # check the signs of the function at the points c and a and reassign
+    # a or b accordingly as the midpoint to be used in the next iteration.
+    else if(f(midpoint)*f(a)<0){
+      b=midpoint
+    }
+    else if(f(midpoint)*f(b)<0){
+      a=midpoint
+    } 
+  }
+  
+  # If the max number of iterations is reached and no root has been found, throw an error.
+    if(i==n){
+      stop("Max number of iterations reached.")
+    }
+```
+
+
+```{r}
+#' HW3: mathematics
+#'
+#' In this exercise, we will use the different `map` functions from the `purrr` package.
+#' DO NOT use any `for`, `while` or `repeat` loop.
+#'
+#' 1. Load the `purrr` package. Create a list `list_fun` containing three elements: the functions `linear = function(x) x`,
+#' `quadratic = function(x) (x - pi/2)^2 - pi/2`,  `sinusoidal = function(x) sin(x)`.
+## Do not modify this line!
+library(purrr)
+list_fun = list(linear = function(x) x,quadratic = function(x) (x - pi/2)^2 - pi/2,sinusoidal = function(x) sin(x))
+
+
+#' 2. Use `map_dbl` along with `integrate` to compute the value of the integrals between `-3*pi/4` and `3*pi/4` of each of the three functions in `list_fun`.
+#' Assign this result to a vector `integral_values` having the same names as `list_fun`.
+## Do not modify this line!
+integral_values= map_dbl(list_fun,function(x) integrate(x,-3*pi/4,3*pi/4)$value)
+						  
+#' 3. Use `map_dbl` along with `uniroot` to compute the root between `-3*pi/4` and `3*pi/4` of each of the three functions in `list_fun`.
+#' Assign this result to a vector `root_values` having the same names as `list_fun`.
+## Do not modify this line!
+root_values = map_dbl(list_fun,function(x) uniroot(x,c(-3*pi/4,3*pi/4))$root)
+
+
+#' 4. Use `map_dbl` along with `optimise` to find the minimizer between `-3*pi/4` and `3*pi/4` of each of the three functions in `list_fun`.
+#' Assign the value of each function at the minimum to a vector `min_values` having the same names as `list_fun`.
+#' Assign the value of each function at the minimum's minimizer to a vector `min_position` having the same names as `list_fun`.
+## Do not modify this line!
+min_values = map_dbl(list_fun,function(x) optimise(x,c(-3*pi/4,3*pi/4))$objective)
+min_position = map_dbl(list_fun,function(x) optimise(x,c(-3*pi/4,3*pi/4))$minimum)
+
+
+}
+```
+
+
+```{r}
+#' HW3: Map
+#'
+#' In this exercise, we will use the different `map` functions from the `purrr` package.
+#' DO NOT use `while` loop in this exercise.
+#'
+#' 1. Load the `purrr` package. For each column in the `mtcars` data set, calculate the mean using `map`. Store the results in a list `m1`.
+## Do not modify this line!
+library(purrr)
+m1=map(mtcars,mean)
+
+
+
+#' 2. Do the same thing as above, but return a vector named `m2` using `map_dbl`.
+## Do not modify this line!
+m2=map_dbl(mtcars,mean)
+
+
+#' 3. Calculate the mean once again, trimming the 10% maximal and minimal values using `map_dbl`. Save the result in a vector named `m3`.
+## Do not modify this line!
+m3=map_dbl(mtcars,function(x) mean(x,trim = 0.1)) 
+
+
+#' 4. Split `mtcars` by `cyl` into a list and calculate the number of rows for each element of the list using `split` and `map_int`. Store the result in a vector named `m4`.
+#' Note: Do not change column names.
+## Do not modify this line!
+m4 <- mtcars %>% split(.$cyl) %>%map_int(nrow)
+		   mtcars$cyl
+```
+
+
+```{r}
+#' HW3: map2
+#'
+#' Consider the `iris` dataset.
+#'
+#' 1. Use `map`, `keep` and `summary` function to calculate the summary statistics of each column containing numeric data, save the answer into a list `m1`.
+#'    The length of the list `m1` should be the same as the number of numeric columns. Each element in `m1` corresponds to the summary of each numeric column.
+## Do not modify this line!
+library(purrr)
+m1 = keep(iris,is.numeric)%>%map(summary)
+
+
+
+#' 2. Use `map_dbl` , `keep` and `mean` to calculate the mean value for each numeric column with max/min 5% values trimmed, save the answer into a vector `m2`.
+#'    Hint: use `trim` argument in `mean` function.
+## Do not modify this line!
+m2 = keep(iris,is.numeric)%>%map_dbl(function(x) mean(x,trim=0.05))
+
+
+#' 3. Now, use `map2_dbl` to calculate the trimmed mean with trim level `0.01`, `0.05`, `0.1` and `0.2` respectively for column `Sepal.Length`, `Sepal.Width`, `Petal.Length` and `Petal.Width`.
+#'    Save the answer into a vector `m3`.
+## Do not modify this line!
+
+m3 = iris%>%keep(~is.numeric(.x))%>%map2_dbl(c(.01,.05,.1,.2),mean)
+m3
+#' 4. Use `detect_index` and `map_dbl` to detect the numeric column with variance greater than `3`, save the index number into `select_var` and the corresponding column name into `m4`.
+#' Try to write all the answers in one line.
+## Do not modify this line!
+select_var =iris%>%keep(~is.numeric(.x))%>%map_dbl(var)%>%detect_index(~.x>3)
+select_var
+m4=colnames(iris[select_var])
+m4
+```
+
+```{r}
+#' HW3: map3
+#'
+#' Consider the `diamonds` dataset from the `ggplot2` package. For this exercise, you are not allowed to use `for`, `while`, or `repeat` loops.
+#'
+#' 1. Find the highest price for each color in the dataset using function `map_dbl` and `split`. Save the result to an atomic vector `max_price`.
+## Do not modify this line!
+library(purrr)
+library(ggplot2)
+max_price = diamonds%>%split(.$color)%>%map_dbl(~max(.x$price))
+#max_price
+
+#' 2. Describe the highest price for each color using the following format: 'The highest price of color D is 18693'. Save the sentences in a character vector `max_price_sentence`.
+#'    You are required to use function `imap_chr` in your solution.
+## Do not modify this line!
+max_price_sentence = max_price %>%imap_chr(~paste0("The highest price of color ",.y," is ", .x))
+max_price_sentence
+#' 3. Copy `diamonds` to a tibble `t1` and replace every row by the first row using function `modify`.
+## Do not modify this line!
+library(tibble)
+t1 = diamonds%>%modify(~.x[[1]])
+t1
+
+#' 4. Copy `diamonds` to a tibble `t2` and replace all numeric columns of each row by the mean value of every numeric column.
+#'    You are required to use function `modify_if` in your solution.
+## Do not modify this line!
+t2=diamonds%>%modify_if(is.numeric,~mean(.x))
+
+
+```
+
+```{r}
+#' HW3: map4
+#'
+#' In this exercise, we will use the `map` function to perform data analysis on the `mtcars` dataset.
+#'
+#' 1. Load the `purrr` package. Compute the standard deviation of every column in `mtcars` and store the result
+#' in a variable `mtcars_sd` using `map_dbl()`.
+## Do not modify this line!
+library(purrr)
+mtcars_sd=mtcars%>%map_dbl(~sd(.x))
+
+
+
+#' 2. Copy data `mtcars` into `mtcars_factor`. Using `as.factor` and `modify_at`, change the column `cyl` and `gear`
+#' of `mtcars_factor` from type `numeric` to type `factor`.
+## Do not modify this line!
+mtcars_factor=mtcars %>%modify_at(c("cyl","gear"),as.factor) 
+class(mtcars_factor$cyl)
+
+
+#' 3. Compute the standard deviation of every `numeric` column of `mtcars_factor` and store the result into a mixed data
+#' frame called `mtcars_numeric_sd` using `map_if()` and `is.numeric`.
+## Do not modify this line!
+mtcars_numeric_sd=mtcars_factor%>%map_if(is.numeric,~sd(.x))
+
+
+#' 4. Compute the number of levels in each `factor` column of `mtcars_factor` and store the result into a mixed data frame
+#' called `mtcars_factor_level` using `map_if()` and `is.factor`.
+#' (Hint: to get of levels in factor `x`, use `levels(x)`; to get the unique elements of a list `x`, use `unique(x)`;
+#' to get the length of a list `x`, use `length(x)`)
+## Do not modify this line!
+mtcars_factor_level=mtcars_factor %>%map_if(is.factor,~.x %>% levels() %>% unique() %>% length())
+
+
+```
+
+
+```{r}
+#' HW3: map5
+#'
+#' In this exercise, we will play around with `got_chars` data from `repurrrsive` package. For this exercise, you are not allowed to use `for`, `while`, or `repeat` loops.
+#'
+#' 1. Load the `purrr` and `repurrrsive` packages. Use `map_chr` to extract all the `name` from `got_chars`, store them into a vector of characters called `name_list`.
+#'    Then, use `map` to extract all the `aliases` from `got_chars`, store them into a list called `nick_name_list`.
+## Do not modify this line!
+library(repurrrsive)
+library(purrr)
+
+got_chars[[19]]$aliases=NULL
+name_list=map_chr(got_chars,~.$name)
+nick_name_list=map(got_chars,~.$aliases)
+
+length(nick_name_list)
+
+
+#' 2. Make a function called `hello` with argument `x` (e.g., `hello(x)`). Inside the `hello` function, use `paste` to concatenate `Hello `, `x` and `!\n`, the `sep` should be empty.
+#'    Use `map_chr` and `hello` functions to save sentences like `Hello ` + name in name_list + `!\n` into a vector `hello_sentences`.
+## Do not modify this line!
+hello=function(x) {paste("Hello ",x,"!\n",sep="")}
+hello_sentences=name_list %>%map_chr(~hello(.x))
+
+
+#' 3. Use `map_chr` and `paste` functions to add ` or ` to collapse aliases of each person. Store returned values into list `nick_name_list_update`.
+#'    For instance, the first element will be `"Prince of Fools or Theon Turncloak or Reek or Theon Kinslayer"`
+## Do not modify this line!
+nick_name_list_update=nick_name_list %>%map_chr(~paste(.x,collapse=" or "))
+
+
+#' 4. Use `map2_chr` on `name_list` and `nick_name_list_update` along with `paste` to insert `can be called` when mapping.
+#'    For instance, if the first element of `name_list` is `"A"`, and the corresponding element of `nick_name_list_update` is `"B or C"`,
+#'    you are supposed to get `"A can be called B or C"`.
+#'    Store the resulting vector of characters into `sentences_list`.
+## Do not modify this line!
+sentences_list=map2_chr(name_list,nick_name_list_update,~paste(.x,"can be called",.y))
+
+
+```
+
+```{r}
+#' HW3: Reduce
+#'
+#' 1. Load the `purrr` package. Create a function `my_factorial(n)` which calculates the factorial of a number using `reduce`. You can assume the input will only be a natural number.
+#'    Note: DO NOT use `factorial` function from the base package.
+## Do not modify this line!
+library(purrr)
+my_factorial =function(n){
+	if(n==0){
+		return(1)
+	}
+	else{
+    return(reduce(as.numeric(1:n),`*`))
+		}
+	}
+
+
+#' 2. Create a function `compare_length(vec1, vec2)` that takes as input 2 vectors and returns the maximum length of them using `max`.
+## Do not modify this line!
+compare_length=function(vec1,vec2){
+	max(length(vec1),length(vec2))
+}
+
+
+#' 3. Create a function `max_length(l)` that takes as input a list of vectors and returns the maximum length among the vectors using `reduce` and `compare_length`. You can assume there will be at least two vectors inside the list.
+## Do not modify this line!
+max_length=function(l) return(reduce(l,compare_length))
+
+
+#' 4. Implement `arg_max(x, f)`. It should take as input a vector `x` and a function `f`, and return a vector of the elements of `x` where the function returns the highest value.
+#'    Example: `arg_max(-10:5, function(x) x ^ 2)` should return -10. `arg_max(-5:5, function(x) x ^ 2)` should return c(-5, 5).
+## Do not modify this line!
+arg_max=function(x,f){
+	highestv=reduce(f(x),max)
+	return (x[which(f(x)==highestv)])
+}
+
+
+
+
+#' 5. Implement `my_rle(x, f)` that takes as input a list `x` and a predicate function `f`, and returns a `rle` object that contains the lengths and values of runs of elements where the predicate is true. Please use `rle` and `map_lgl`.
+#'    Example: Given a list `list("a", "b", "c", 1, 2, 3)` and predicate function `is.character`, this function should return a `rle` object with first element `lengths: 3 3` and second element `values: TRUE FALSE`.
+## Do not modify this line!
+my_rle=function(x,f){
+	rle(map_lgl(x,f))
+}
+
+
+#' 6. Implement `span(x, f)` using `my_rle`. Given a list `x` and a predicate function `f`, `span(x, f)` returns the location of the first longest sequential run of elements where the predicate is true.
+#'    Note: If f(x) is FALSE for every x in the list, return `NA`.
+## Do not modify this line!
+span=function(x,f){
+  if (all(my_rle(x,f)$values == FALSE)){
+    return(NA)
+  }
+  else {
+    len=which(my_rle(x,f)$values==TRUE)
+    values=my_rle(x,f)$lengths
+    Tvalues=values
+    Tvalues[-len]=0
+    max_v_index=which(Tvalues==max(Tvalues))
+    if (max_v_index==1){
+      return(1)
+    }
+    else{
+      return(sum(values[1:(max_v_index-1)])+1)
+    }
+  }
+}
+```
+
+```{r}
+#' HW3: reduce4
+#'
+#' 1. Load library `purrr`. Set the random seed as 5206. Save the random seed vector to `seed`.
+#'    Use `map` to create a list `l1` with 5 elements, where each element is a vector of 20 random integers
+#'    between `1:10` sampled with replacements (i.e., use the `sample` function and let `replace` be `TRUE`).
+## Do not modify this line!
+library(purrr)
+set.seed(5206)
+seed=.Random.seed
+l1=1:5 %>%map(~sample(1:10,20,TRUE))
+
+
+#' 2. Use `reduce` to get intersection of the 5 elements of `l1`, and assign the values to a vector `r1`.
+#'    Similarly, use `reduce` to get union of `l1`, and store returned values to a vector `r2`.
+## Do not modify this line!
+r1=reduce(l1,intersect)
+r2=reduce(l1,union)
+
+
+#' 3. Create a data frame called `df1` with first column `A` and values `letters[1:5]`,
+#'    second column `B` with values `1:5`, third column `C` with values `2:6`.
+#'    Note that, when using `data.frame`, the first column will be automatically converted as a factor (i.e., do NOT use `stringsAsFactors = FALSE`).
+#'    Then, use the `detect` function to find which column has factor values and save its result as `df1_factor`.
+## Do not modify this line!
+df1=data.frame("A"=letters[1:5],"B"=1:5,"C"=2:6)
+df1_factor=detect(df1,is.factor)
+
+
+#' 4. Similarly as in 3, create a data frame called `df2` with first column `A` and values `letters[1:5]`, second column `D` with values `3:7`, third column `E` with values `4:8`.
+#'    Create yet another data frame called `df3` with first column `A` and values `letters[1:5]`, second column `G` with values `5:9`, third column `H` with values `6:10`.
+#'    Again, do NOT use `stringsAsFactors = FALSE` when you create the two data frames.
+#'    Then, combine three data frames into a list and call it `df_list`.
+#'    Finally, use `reduce` and `merge` functions to bind all columns with different names.
+#'    Store the returned data frame, which should be of dimension `5x7`, into `merged_df`.
+## Do not modify this line!
+df2=data.frame("A" = letters[1:5],"D"=3:7,"E"=4:8)
+df3=data.frame("A" = letters[1:5],"G"=5:9,"H"=6:10)
+
+df_list=list(df1,df2,df3)
+
+merged_df=reduce(df_list,merge)
+
+```
+
+```{r}
+#' HW3: Map Reduce
+#'
+#' In this exercise, we will use `map-reduce` to efficiently calculate means of large vectors from the `MplsStops` dataset, contained in
+#' the package `carData`. The `MplsStops` dataset records all stops made by the Minneapolis Police Department for the year 2017.
+#' It contains 51857 observations with 14 variables.(Docs: https://vincentarelbundock.github.io/Rdatasets/doc/carData/MplsStops.html).
+#'
+#'
+#' 1. Load the packages `carData` and `purrr`. Select all the numeric columns from `MplsStops` dataset and store them in a variable `mpls_num`.
+#'    (Hint: use the `keep(.x, .p)` function to select the correponding columns from dataset `.x` that satisfies the contraints defined in `.f`).
+## Do not modify this line!
+library(purrr)
+library(carData)
+mpls_num=MplsStops %>%keep(~is.numeric(.x))
+
+
+#' 2. Calculate the mean of each column and store them in a list `mpls_mean`. (Hint: Use `map_dbl()` and `mean()`.)
+#'    Calculate the time it takes to calculate the mean and store it in a variable called `time1`.
+#'    (Hint: use `Sys.time()` to calculate the current system time. Create a variable `startime` to store the system time before the
+#'    calculation and a variable 'endtime' after the calculation. The duration of the calculation is `endtime-startime`.)
+## Do not modify this line!
+Sys.time()
+startime=Sys.time()
+mpls_mean=mpls_num %>%map_dbl(mean) 
+endtime=Sys.time()
+time1=endtime-startime
+
+
+#' 3. Use `reduce()` to calculate the mean of `mpls_mean`(which is the overall mean of the three columns `lat`, `long` and `policePrecinct`)
+#'    and store the result in `mpls_reduce`. (Hint: `reduce(x, f)` conducts an operation `f` on all the elements in the vector `x`.
+#'    You can use `reduce` to calculate the sum of `mpls_mean` and then calculate the mean by dividing by the length.)
+## Do not modify this line!
+mpls_reduce=mpls_mean %>%reduce(sum)
+mpls_reduce=mpls_reduce/3
+
+
+#' 4. Use a `for` loop to manually calculate the overall mean of the three columns `lat`, `long` and `policePrecinct` and store the
+#'    result in a variable `naive_calculation` (it should be the mean of the three colums, not the mean of each column).
+#'    Do NOT use the function `mean()`.
+#'    Store the calculation time in variable `time2`(Hint: calculate the OVERALL mean of the three columns, not columnwise mean.
+#'    Calulation time can be calculated in same way as question 2).
+## Do not modify this line!
+Sys.time()
+startime=Sys.time()
+sum=0
+for (i in 1:3){
+	for (j in 1:length(mpls_num$lat)){
+		sum=mpls_num[j,i]+ sum
+	}
+}
+naive_calculation=sum/(3*length(mpls_num$lat))
+endtime=Sys.time()
+time2=endtime-startime
+
+```
+
+```{r}
+#' HW3: Function factory
+#'
+#' In this exercise, we will write a function computing the k^{th} order statistics and a function computing the density of a mixture model.
+#' Order Statistics Reference: https://en.wikipedia.org/wiki/Order_statistic.
+#'
+#' 1. Implement a function `kth_order(vec, k)` that takes as input a vector and returns its k^{th} order statistics. If `k` is not an index of the vector, the function should return `NA`.
+#'    Use the `sort()` and `seq_along()` function to create this function.
+## Do not modify this line!
+kth_order=function(vec,k){
+	len=length(vec)
+	if (k < 1 || k > len){
+		return(NA)
+	}
+	else {
+		seq_along(k)
+		new_vec=sort(vec)
+		return(new_vec[k])
+	}
+}
+
+
+
+#' 2. Implement a function `order_factory(k)` that takes as input an index `k` and returns a function that compute the k^{th} order statistics of a vector `vec` using `kth_order`. Don't forget to use `force()`.
+## Do not modify this line!
+order_factory =function(k){
+	force(k)
+	function(vec) {
+		kth_order(vec,k)
+		}
+}
+
+
+#' 3. Create a function `my_mixture(x, c1, mu1, sigma1, c2, mu2, sigma2)` that evaluates the probability density function `p(x) = c1 x N(x; mu1, sigma1) + c2 x N(x; mu2, sigma2)` at `x`. The sigma here is the standard deviation.
+#'    You can assume that 0 <= c1 <= 1, 0 <= c2 <= 1, c1 + c2 = 1, sigma1 > 0, sigma2 > 0.
+## Do not modify this line!
+my_mixture=function(x,c1,mu1,sigma1,c2,mu2,sigma2){
+	c1*dnorm(x,mu1,sigma1)+c2*dnorm(x,mu2,sigma2)
+}
+
+
+#' 4. Implement a function `mixture_factory(c1, mu1, sigma1, c2, mu2, sigma2)`. This function makes a function that evaluates the probability density function `p(x) = c1 x N(x; mu1, sigma1) + c2 x N(x; mu2, sigma2)`. The sigma here is the standard deviation.
+#'    You can assume that 0 <= c1 <= 1, 0 <= c2 <= 1, c1 + c2 = 1, sigma1 > 0, sigma2 > 0. Use the functions `force` and `dnorm`.
+## Do not modify this line!
+mixture_factory=function(c1,mu1,sigma1,c2,mu2,sigma2){
+	force(c(c1,mu1,sigma1,c2,mu2,sigma2))
+	function(x){
+		c1*dnorm(x,mu1,sigma1)+c2*dnorm(x,mu2,sigma2)
+	}
+}
+```
+
+```{r}
+#' HW3: function factory 2
+#'
+#' 1. Create a function `f` that takes an input value `x` and evalutes `f(x) = x^4-2x^3-7x^2+9`.
+## Do not modify this line!
+f=function(x){
+	x^4-2*x^3-7*x^2+9
+}
+
+
+#' 2. Create a function factory `polynomial_factory` that takes an 
+input vector `a` and returns a polynomial function, for example,
+#'    `polynomial_factory(a=c(9,0,-7,-2,1))` will output the function defined in the previous exercise.
+#'    Reminder: use `force`.
+## Do not modify this line!
+polynomial_factory=function(a){
+	force(a)
+	function(x) {
+		evaluation=0
+		for (i in 1:length(a)){
+    		evaluation=evaluation + a[i]*x^(i-1)}
+		evaluation
+	}
+}
+
+
+#' 3. Use `optimise` to calculate the minimum point `xmin` and minimum value `ymin` between `(-5,10)` for the function `f` in exercise 1.
+## Do not modify this line!
+ymin=optimise(f,c(-5,10))$objective
+xmin=optimise(f,c(-5,10))$minimum
+
+
+#' 4. Use `map`, `polynomial_factory` and `optimise` to calculate the minimum of `f(x)=3x^3-8x^2+2x-7`, `f(x)=x^5-2x^4-3x^2+5x`, and `f(x)=x^4-2x^2+7x+6` within range `(-2,5)`,
+#'    save the answer into a list `v`, with length of 3, each component consists of a `minimum` and an `objective` which represent the minimum point and minimum value respectively.
+#'    Try to write the code in one line.
+## Do not modify this line!
+library(purrr)
+v=map(map(list(c(-7,2,-8,3),c(0,5,-3,0,-2,1),c(6,7,-2,0,1)), ~polynomial_factory(.x)),~optimise(.x,c(-2,5)))
+
+```
+
+```{r}
+#' HW3: Normal distribution factory
+#'
+#' 1. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`).
+## Do not modify this line!
+set.seed(0)
+seed=.Random.seed
+
+
+#' 2. Write a function `norm_factory` that takes as input two arguments `mu` and `var` and returns a function
+#' that takes a number `n` as argument and returns `n` samples from a normal distribution with mean `mu` and
+#' variance `var`. Use `rnorm` to simulate the sampling.
+#' Note: you should use `force()` in `norm_factory`.
+## Do not modify this line!
+norm_factory=function(mu,var){
+	force(c(mu,var))
+	function(n) {
+		return(rnorm(n,mu,sqrt(var)))
+	}
+}
+
+
+
+#' 3. Use `norm_factory` to create two functions allowing to sample from distributions with the following
+#' characteristics:
+#' - `d0_1`: from a normal distribution with mean zero and standard deviation 1
+#' - `d0_2`: from a normal distribution with mean zero and standard deviation 2
+#' Then, use the two functions to generate two vectors of 1000 samples from each distributions,
+#' and store them respectively in `s0_1` and `s0_2`.
+#' Note 1: respect the order when you sample (i.e., use `d0_1` and only then use `d0_2`), otherwise the automated won't work.
+#' Note 2: you can't call `rnorm` directly in this question.
+## Do not modify this line!
+d0_1=norm_factory(0,1)
+d0_2=norm_factory(0,4)
+s0_1=d0_1(1000)
+s0_2=d0_2(1000)
+
+
+#' 4. Compute the empirical mean and variance of each vector and assign them to `m_s0_1`, `m_s0_2`, `v_s0_1`,
+#' `v_s0_2`. You should use the built-in functions `mean` and `var`.
+## Do not modify this line!
+m_s0_1=mean(s0_1)
+m_s0_2=mean(s0_2)
+v_s0_1=var(s0_1)
+v_s0_2=var(s0_2)
+
+
+#' 5. Write a function `m_norm_factory` that takes as input three arguments `m`, `mu` and `var` where `m` is
+#' a positive integer, `mu` is a vector of size `m` and `var` is a positive real number. It should return a
+#' function that takes a number `n` as argument and returns `n` samples from a multivariate normal distribution
+#' with `m` components, mean `mu` and a diagonal covariance matrix in which the variance of each component is
+#' `var` if `var` is smaller than 2 and 2 otherwise. To do so, load the package `MASS` and use its function
+#' `mvrnorm` to simulate the sampling.
+#' Note: you should use `force()` in `m_norm_factory`.
+#'
+## Do not modify this line!
+library(MASS)
+
+multivariate_norm_factory=function(m,mu,var){
+	force(c(m,mu,var))
+	function(n){
+		if (var<2){
+			diagm=var*diag(m)
+		}
+		else{
+			diagm=2*diag(m)
+		}
+		mvrnorm(n,mu,diagm)
+	}
+}
+```
+

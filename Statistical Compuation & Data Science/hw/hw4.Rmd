@@ -1,0 +1,1207 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Huiqian Yu
+---
+
+HW4 for SCIDS
+
+```{r}
+# HW3: Function composition
+#'
+# An important way of combining functions is through composition: `f(g(x))`. Composition takes a list of functions
+# and applies them sequentially to the input.
+#'
+# We will work with the Iris dataset. The Iris dataset contains the results of multiple measurements on Iris
+# flowers used to quantify the morphologic variation of Iris flowers of three related species. The dataset consists
+# of 50 samples from each of three species of Iris (Iris Setosa, Iris virginica, and Iris versicolor). Four
+# features were measured from each sample: the length and the width of the sepals and petals, in centimeters. This
+# dataset became a typical test case for many statistical classification techniques in machine learning.
+#'
+# 1. Load the `purrr` package and the `tibble` package. Load the Iris dataset into the namespace using `data(iris)`.
+# This essentially loads the variable `iris` as a data frame containing the iris data.  Turn it into a tibble using
+# `as_tibble`.
+# Note: the tibble should be named `iris`.
+## Do not modify this line!
+library(purrr)
+library(tibble)
+data(iris)
+
+
+iris =as_tibble(iris) 
+
+
+# 2. Use `map_dbl` and `compose` from the `purrr` package to return the square root of the number of unique values in
+# each column of the `iris` tibble. Assign the result to a variable `squ_n_unique`. Use the built-in `sqrt`,
+# `length` and `unique` functions.
+## Do not modify this line!
+squ_n_unique=iris%>%map_dbl(compose(sqrt,length,unique))
+squ_n_unique
+
+# 3. Now build your own custom `compose_2` function operator that takes in two inputs `f` and `g` and returns
+# the function `f(g(...))`
+# Note: we assume that the input/output of `f` and `g` match such that the composition makes sense. Make
+# sure you use `force()`. You are not allowed to use `compose` from the `purrr` package here.
+## Do not modify this line!
+compose_2=function(f,g){
+	force(c(f,g))
+	function(...){
+		f(g(...))
+	}
+}
+
+
+# 4. Use `compose_2` to build your own custom `compose_3` function operator that takes in three input
+# functions `f`, `g` and `h` of functions and returns the composition of those (a function itself).
+# Note: Use only one call to `compose_2` to do so. Again, we assume that the input/output of the functions match
+# such that the composition makes sense. Make sure you use `force()`. You are not allowed to use `compose` from the
+# `purrr` package here.
+## Do not modify this line!
+compose_3=function(f,g,h){
+	force(c(f,g,h))
+	function(...){
+		compose_2(f,g)(h(...))
+	}
+}
+
+
+# 5. Use `custom_3` and `map_dbl` to replicate the results 
+#you obtained using `purrr::compose` in question 2. Assign the result to a
+# variable `squ_n_unique_custom`.
+# Hint: again, use the built-in `sqrt`, `length` and `unique` functions.
+#'
+## Do not modify this line!
+squ_n_unique_custom=iris%>%map_dbl(compose_3(sqrt,length,unique))
+
+
+```
+
+```{r}
+# HW3: Memoise function
+#'
+# In this exercise, we will compare the performance of an algorithm with and without using `memoise`.
+#'
+# Problem description:
+#    You are climbing a stair case. It takes n steps to reach to the top. Each time you can either climb 1 or 2 steps.
+#    In how many distinct ways can you climb to the top?
+# Example :
+# There are three ways to climb to the top of 3 stairs :
+# 		1. 1 step + 1 step + 1 step
+# 		2. 1 step + 2 steps
+# 		3. 2 steps + 1 step
+# Hint: Dynamic programming means that when a problem with a larger size uses the result of the same problem with a smaller size,
+#    we can speed up the algorithm by saving the result of the smaller-sized subproblem and using these result to infer the result of
+#    a larger-sized subproblem.
+#    It is often very efficient compared to the naive recursive solutions.
+# 		For example, in this stair case problem, we factor the problem of climbing n-step stairs into n problems of climbing 1, 2, ..., n-step stairs.
+# 		If we want to climb n stairs, we can either start with 1 step and and then climb the n-1 other steps or start with 2 steps
+# 		and then climb the n-2 other steps.
+#    Thus N(n)=N(n-1)+N(n-2). We have decomposed the problem in two subproblems. In order to do that efficiently we need to store
+#    the result of all the different subproblems.
+#    In R, we use memoise function to cache the result of each subproblem.
+# 1. Implement `climb()` in a plain recursive way and report the time for calculating `climb(10)` in variable `time1`.
+#    (Hint: use `Sys.time()` to calculate the current system time. Create a variable `startime` to store the system time
+#    before the calculation and a variable 'endtime' after the calculation. The duration of the calculation is `endtime-startime`.)
+## Do not modify this line!
+
+climb=function(n){
+	if(n==1|n==0){
+		return(1)
+	}
+	else
+	return(climb(n-1)+climb(n-2))
+}
+starttime = Sys.time()
+#time1=climb(10)
+endtime = Sys.time()
+time1 = endtime-starttime
+
+# 2. Write a function named `climb2()` to calculate the climbing stairs problem using the `memoise()` function.
+#    Report the running time for calculating `climb2(10)` in variable `time2`.
+#    (Hint: use `Sys.time()` to calculate the current system time. Create a variable `startime` to store the system time
+#    before the calculation and a variable 'endtime' after the calculation. The duration of the calculation is `endtime-startime`.)
+## Do not modify this line!
+library(memoise)
+climb2=memoise(function(n){
+	if(n==1|n==0){
+		return(1)
+	}
+	else
+	return(climb(n-1)+climb(n-2))	
+})
+starttime = Sys.time()
+climb(10)
+endtime = Sys.time()
+time2 = endtime-starttime
+
+```
+
+```{r}
+# HW4: Exit handlers
+#'
+# 1. Write a function `print_row` that takes a data.frame `df` and an integer
+# `row` and prints the corresponding row of `df`.
+# Use `capture.output` and `print_row` to assign the printed first row of the
+# data.frame `mtcars` to the variable `first_row`.
+## Do not modify this line!
+
+print_row=function(df,row){
+	print(df[row,])
+}
+first_row=capture.output(print_row(mtcars,1))
+
+# 2. Implement your own `capture.output2` that takes as arguments `code` and
+# `file`, a piece of R code and a file path (string) respectively.
+# Use `sink()` to divert the output to the file at path `file`.
+# Use an exit handler to reset the default output using `on.exit()` and
+# `sink()` (don't pass any argument to `sink()` here). Make sure you set
+# arguments `add` and `after` to `TRUE`.
+# Your function should also force the code execution (use `force()`) and read
+# the file at `file` before exiting (using `readLines()`).
+## Do not modify this line!
+
+
+capture.output2=function(code,file){
+	sink(file)
+	on.exit(code,add=TRUE,after=TRUE)
+	force(code)
+	sink()
+    readLines(file)	
+}
+# 3. Now write a function `capture.output3` that only takes in one argument
+# `code`. Your function should create a temp file using `tempfile()` - and make
+# sure the file is removed upon exiting the function call using `on.exit` and
+# `file.remove`. Use `sink()` to divert the output to this file - and make sure
+# you reset the default output upon exiting using `on.exit`. Then force the
+# `code` execution and read the temp file.
+# Make sure you set arguments `add` and `after` to `TRUE` of your `on.exit`
+# calls.
+## Do not modify this line!
+capture.output3=function(code){
+	temp_file=tempfile()
+	on.exit(file.remove(temp_file))
+	sink(temp_file)
+	on.exit(sink,add=TRUE,after=TRUE)
+	force(code)
+    sink()
+	readLines(temp_file)
+}
+
+
+# 4. Write a function `capture.output4` that takes as inputs `code` and `file`
+# (`file`'s default value should be set to `NULL`).
+# Your function should check if `file` is `NULL`: if yes, assign a new tempfile
+# to variable `temp` and if not assign the non-null `file` to `temp` - make
+# sure to remove the file when exiting if a tempfile was created.
+# Then it should implement the same functionality as before:
+# - divert the output to `temp` using `sink()`,
+# - force the `code` execution using `force()`
+# - read the file using `readLines()`
+# Make sure to re-divert the default output upon exiting using `sink()` with
+# no argument.
+#'
+## Do not modify this line!
+capture.output4=function(code, file=NULL){
+	if (is.null(file)){
+		temp=tempfile()
+		on.exit(file.remove(temp))
+		
+	}
+	else {
+		temp=file
+	}
+
+	sink(temp)
+	on.exit(sink,add=TRUE,after=TRUE)
+	force(code)
+	readLines(temp)	
+}
+
+
+```
+
+
+```{r}
+# HW4: Error log
+#'
+# In this exercise, we will focus on functions to capture errors.
+#'
+# 1. Load the `purrr` package and the Iris dataset into the namespace
+#    using `data(iris)`.
+#    Use `map_dbl`, `keep`, `is.numeric` and `max` to calculate the
+#    maximum of each numerical column, save the answer into `m1`.
+## Do not modify this line!
+library(purrr)
+data(iris)
+m1=iris %>%keep(~is.numeric(.x))%>%map_dbl(max)
+
+
+# 2. Now think about a case when we don't know exaxctly which column
+#    can we calculate the maximum,
+#    which column we can't, what should we do?
+#    Use `map` to calculate the maximum of each column, this time,
+#    including the invalid columns as well.
+#    Use `safely` to make sure the code can run successfully,
+#    save the result into `y`.
+#    Then use `transpose`, `map_lgl` and `is_null` to check which column
+#    can we calculate the maximum value in the iris dataset.
+#    Create a logical vector `is_ok` of length 5 (number of columns in iris
+#    dataset). If the maximum of one column can be calculated,
+#    the value should be `TRUE`, otherwise `FALSE`.
+## Do not modify this line!
+y=iris %>%map(safely(~max(.x)))
+is_ok=map_lgl(transpose(y)$error,~is_null(.x))
+
+
+# 3. Now use `is_ok` to output the name of the column on which we cannot
+#    have the maximum, save it to `invalid_column`.
+#    Then, use the function `flatten_dbl` and `y` from the previous exercise
+#    to extract the maximum for the valid columns, save the answer into a
+#    vector `m2`.
+## Do not modify this line!
+invalid_column=names(iris[!is_ok])
+m2=flatten_dbl(transpose(y)$result[is_ok])
+
+
+# 4. Create a vector `m` of length equal to the number of columns in `iris`
+#    and filled with numerical `NA` (i.e. `NA_real_`).
+#    For the elements of `m` corresponding to the numberical
+#    columns of `iris`, put the calculated maximums.
+## Do not modify this line!
+m=rep(NA_real_,length(iris))
+m[is_ok]=m2
+
+
+# 5. Use `possibly` and `map_dbl` to compute a vector similar to `m` and
+#    save the resulting vector into `m3`.
+## Do not modify this line!
+m3=map_dbl(iris,possibly(~max(.x),NA_real_))
+
+
+# 6. Now use `map_dbl` and `mean` to calculate the mean of all the columns in
+#    `iris`, save the answer into a vector `s`.
+## Do not modify this line!
+s=map_dbl(iris,mean)
+
+
+# 7. Notice that there's an `NA` value in `s`. We can use `quietly` to further
+#    investigate the warning message, to find out why `NA` is generated.
+#    This exercise is similar to exercise 2 and exercise 3, so when you follow
+#    the instructions, you might want to compare your code and the output
+#    result with exercise 2 and 3.
+#    First, use `map` and `quietly` to get the mean of each column, assign the
+#    result to a list `y2`.
+#    Then, use `transpose` and save the `warnings` sublist in a new list
+#    called `warning_log`.
+#    Finally, use `map_lgl` to check for which columns we can
+#    calculate the standard error without warning message,
+#    and save the logical vector into `is_ok2`.
+#    Its length should be equal to the number of columns
+#    in the iris dataset: if there's no warning message,
+#    the value for the corresponding columnb should be `TRUE`,
+#    otherwise `FALSE`.
+#    Hint: the following function might be useful to check whether
+#    an element of `warning_log` is a warning.
+#    ```
+#    warning_indicator <- function(x) {
+#        identical(x, character(0))
+#    }
+#    ```
+#    Now use `is_ok2` to extract the warning message for column
+#    representing the `NA` value in `s`, save the message into a
+#    vector `warning`. You should use `flatten_chr` to get `warning`.
+#'
+## Do not modify this line!
+
+y2=map(iris,quietly(mean))
+warning_log=transpose(y2)$warnings
+warning_log2=warning_log
+warning_log2[lengths(warning_log2)==0]=NA
+is_ok2=map_lgl(warning_log2,~is.na(.x))
+warning=flatten_chr(warning_log2[!is_ok2])
+
+
+```
+
+```{r}
+# HW4: Input/Output
+#'
+# In this exercise, we will get familiar with the different types of outputs such as `print`, `sprintf`, `message`, etc.
+#'
+# 1. Compute the mean miles per gallon (`mpg`) from the `mtcars` data set and store it in a scalar `mean_mpg`.
+#    Using the function `mean`. Use `format` to format the `mean_mpg` with 4 significant digits.
+#    Store formatted value in scalar `formatted_mean`.
+#    Write a function `my_print(x)` that uses the function `print()` to print `"The mean of mpg is <mean>."`.
+#    Substitue `<mean>` by parameter `x` and uses the function `paste0`.
+#    Note: There is no space between `<mean>` and period.
+## Do not modify this line!
+mean_mpg=mean(mtcars$mpg)
+formatted_mean=format(mean_mpg,digits=4)
+my_print=function(x){
+	print(paste0("The mean of mpg is ",x,"."))
+}
+
+
+# 2. Set the random seed to zero and save the random seed vector to `seed`. (hint: use the command `seed <- .Random.seed`)
+#    Use `sample` to sample 5 integers from 1 to 30 without replacement. Store the samples in `my_sample`.
+#    Use the samples in `my_sample` as indices and change the according values in mpg column to `NA`.
+#    Store the modified data in vector `my_mpg`.
+#    Write a function `my_print2(x)` to use `print` to print the vector with 3 digits and replace `NA` by `N/A`.
+#    (Hint : lookup `na.print`).
+## Do not modify this line!
+set.seed(0)
+seed=.Random.seed
+my_sample=sample(1:30,5)
+my_mpg=mtcars$mpg
+my_mpg[my_sample]=NA
+my_print2=function(x){
+	print(x,digits=3,na.print="N/A")
+}
+
+
+# 3. Write a function `wake_up(hour, minute, AMPM)` that takes in two integers `hour` and `minute`,
+#    a string `AMPM` and returns a string `"I wake up at <hour>:<minute> <AMPM>."` using `sprintf`.
+#    Note: Make sure `<hour>` and `<minute>` have 2 significant digits.
+## Do not modify this line!
+wake_up=function(hour,minute,AMPM){
+	sprintf("I wake up at %02.0f:%02.0f %s.",hour,minute,AMPM)
+}
+
+
+# 4. Write a function `convert(x)` that converts the string `x` into numeric values and returns the converted values.
+#    Note: If the type of input is not character, use `stop()` to cast an error message: `Input is not character.`.
+#          After converting the input to its corresponding numerical value,
+#          the function should print the message `Converted successfully.`.
+#          Use the functions `message()` and `as.numeric`.
+#          You can assume the input will always be convertible.
+## Do not modify this line!
+convert=function(x){
+	if (typeof(x)!="character"){
+		stop("Input is not character.")
+	}
+	x=as.numeric(x)
+	message("Converted successfully.")
+	return(x)
+}
+
+
+# 5. Load the `readr` package.
+#    Use the function `write_csv()` to write `mtcars` data set into a .csv file called `mtcars.csv`.
+#    Use `read_csv` to read the `mtcars.csv` and store the data in data frame `my_mtcars`.
+## Do not modify this line!
+library(readr)
+write_csv(mtcars,"mtcars.csv")
+my_mtcars=read_csv("mtcars.csv")
+
+```
+
+```{r}
+# HW4: cp
+#'
+# Last time we learned how to combine functions together in hw3,
+# this time we will introduce partial() function, which can fix some parameters and
+# help us write shorter codes. We will also use compose() and partial() together
+# in this exercise.
+#'
+# 1. Load the `purrr` package. Use `compose` from the `purrr` package to create a
+# function named `mean_sqrt_fun` that computes the square-root of the mean of the a vector
+# by combining the `sqrt` and `mean` functions.
+# Note: Use compose directly to create `mean_sqrt_fun`, so that its arguments are the same 
+#       as the arguments of `mean`.
+# Then, use `map_dbl` to apply `mean_sqrt_fun` to each column of `airquality` and assign
+# the result to a vector named `mean_sqrt_na`.
+# Notice that one could use `mean_sqrt_fun(x, na.rm = TRUE)` to take care of the
+# `NA` that appear for the mean of some columns, but you don't need to do it here.
+## Do not modify this line!
+library(purrr)
+mean_sqrt_fun=compose(sqrt,mean)
+mean_sqrt_na=map_dbl(airquality,~mean_sqrt_fun(.x))
+
+
+# 2. Create a new function named `mean_sqrt_fun_narm` that fixes the parameter
+# `na.rm` as `TRUE` by making use of the `partial()` function from `purrr`.
+# Use `map_dbl` to apply `mean_sqrt_fun_narm` to each column of `airquality` and save the
+# result in a vector named `mean_sqrt_narm`.
+## Do not modify this line!
+mean_sqrt_fun_narm=compose(sqrt,partial(mean,na.rm=TRUE))
+mean_sqrt_narm=map_dbl(airquality,mean_sqrt_fun_narm)
+
+
+# 3. Now build your own `partial_2(f, ...)` function operator that takes in as input
+# `f` (the function to be partially applied) and `...` (the arguments to be fixed).
+# The function `partial_2` should return the function `f(x, ...)`, that is the function
+# from the input with some arguments fixed.
+# Note: make sure that you use `force()`.
+# You are not allowed to use `partial` from the `purrr` package here.
+## Do not modify this line!
+partial_2=function(f,...){
+	force(f)
+	function(x) {
+		f(x,...)
+	}
+}
+
+
+# 4. Use `compose` from the `purrr` package to create a
+# function named `sum_abs_fun` that computes the absolute value of the sum of a vector
+# by combining the `abs` and `sum` functions.
+# Note: Use compose directly to create `sum_abs_fun`, so that its arguments are the same 
+#       as the arguments of `sum`.
+# Then, use `map_dbl` to apply `sum_abs_fun` to each column of `airquality` and assign
+# the result to a vector named `sum_abs_na`.
+# Notice that one could again use `sum_abs_fun(x, na.rm = TRUE)` to take care of the
+# `NA` that appear for the mean of some columns, but you don't need to do it here.
+## Do not modify this line!
+sum_abs_fun=compose(abs,sum)
+sum_abs_na=map_dbl(airquality,sum_abs_fun)
+
+
+# 5. Create a new function named `sum_abs_fun_narm` that fixes the parameter
+# `na.rm` as `TRUE` by making use of your own the `partial_2()` function from `purrr`.
+# Use `map_dbl` to apply `sum_abs_fun_narm` to each column of `airquality` and save the
+# result in a vector named `sum_abs_narm`.
+#'
+## Do not modify this line!
+sum_abs_fun_narm=compose(abs,partial_2(sum,na.rm=TRUE))
+sum_abs_narm=map_dbl(airquality,sum_abs_fun_narm)
+
+
+```
+
+```{r}
+# HW4: Object Oriented Programming
+#'
+# In this exercise, we will create a class `shape` and a child class `rectangle`.
+#'
+# 1. Create a constructor `new_shape(x)` that takes in a string and instantiates
+#    an object of class `shape` using `structure`. Don't forget to use `stopifnot` to check the input.
+#    Create a helper function `shape(x)` that coerces the input
+#    to a string with `as.character` and then calls the constructor.
+## Do not modify this line!
+new_shape=function(x){
+	stopifnot(is.character(x))
+	structure(x,class="shape")
+}
+shape=function(x){
+	new_shape(as.character(x))
+}
+
+
+# 2. Write a new `print` method for class `shape` that prints `"My name is <shape>."` using the function `print`.
+#    The `<shape>` should be substituted by the string in the instance of `shape`.
+#    Make sure that the method returns the object invisibly by adding `invisible(x)` at the end.
+#    Create an instance of `shape` called `s1` of shape `unknown` and then print `s1`.
+## Do not modify this line!
+print.shape=function(x,...){
+	print(paste("My name is ",x,".",sep=""))
+	invisible(x)
+}
+s1=shape("unknown")
+print.shape(s1)
+
+
+# 3. Write a generic function called `area(x)` that does nothing. Don't forget to use `UseMethod`.
+#    Write a default method `area` that prints `"My area is not defined."` using the function `print`.
+#    Test this new method using instance `s1`.
+## Do not modify this line!
+area=function(x){
+	UseMethod("area",object=x)
+}
+area.default=function(x) print("My area is not defined.")
+area(s1)
+
+# 4. Create a constructor `new_rectangle(x, l, w)` that takes as input a string `x`,
+#    and two numbers `l` and `w`, and instantiates an object `rectangle` of class `shape`.
+#    Use the function `class()`. The constructor should give two attributes to `rectangle` :
+#    `length`, equal to `l` and `width`, equal to `w`. Use `attr()` to create the attributes.
+#    Use the line of code `rectangle <- function (x, l, w) new_rectangle(x, l, w)` to create a helper.
+## Do not modify this line!
+
+new_rectangle=function(x,l,w){
+	attr(x,"length")=l
+	attr(x,"width")=w
+	class(x)=c("rectangle","shape")
+	return(x)
+}
+rectangle=function(x,l,w) new_rectangle(x,l,w)
+
+# 5. Write a new method `area` for the class `rectangle` that prints `My area is <area>.` using `print`.
+#    The `<area>` should be substituted by the area of a rectangle of length `length` and width `width`.
+#    Use `attr()` to access these two parameters.
+## Do not modify this line!
+
+
+area.rectangle=function(x){
+	A=attr(x,"length")*attr(x,"width")
+	print(paste("My area is ",A,".",sep=""))
+}
+# 6. Write a method `print` for the class `rectangle` that prints `"My name is <shape>.\nI am a rectangle."`
+#    using `print.shape` and `print`. The `<shape>` should be substituted by the string in the instance of `rectangle`.
+#    Make sure that the method returns the object invisibly by adding `invisible(x)` at the end.
+## Do not modify this line!
+
+
+print.rectangle=function(x,...){
+	print.shape(x)
+	print(paste("I am a rectangle.",sep=""))
+	invisible(x)
+}
+
+# 7. Create an instance `r1` of `rectangle` with name `rect`, length 10, and width 5.
+#    Call `area` and `print` method to instance `r1`.
+## Do not modify this line!
+r1=new_rectangle("rect",10,5)
+area(r1)
+print(r1)
+```
+
+```{r}
+# HW4: Object Oriented Programming
+#'
+# In this exercise, we will create a class `distance` on top of integers and overload the function `mean()`.
+#'
+# 1. Create a constructor `new_distance(x, units)` where:
+#     - `x` is a vector of numbers (not a vector of strings like `"ten"`),
+#     - `units` is an attribute which can take values in `c("mm", "cm", "m", "km")`, with default value `"m"`,
+#     - the object of class `distance` is instanciated using `structure`.
+#    (Hint : Don't forget to use `stopifnot` to check the input type with `is.numeric` and `is.character`.)
+#    Create a helper `distance(x, units)` that checks whether the input `unit` is in the feasible domain
+#    `c("mm", "cm", "m", "km")` and throws an error if not.
+#     (Hint : Use `match.arg()`.)
+#    Write a new `print` method named `print.distance` for class `distance` that prints
+#    `"the distance is <distance> <unit>"` when `<distance>` is a vector of length 1. 
+#    It should print `"the distances are <distance> <unit>"` if 
+#    `<distance>` is a vector of at least two elements.
+#    For example, `print(distance(1:3, "cm"))` should print `"the distances are 1 2 3 cm"`.
+#    Use the functions `print()`, `paste0()`, and the function `attr()` to access the unit of the distance
+#    and use `as.character` to convert the `distance` to a vector of characters,
+#    and the function `attr()` to access the unit of the distance.
+#    (Note: there is a space between `<distance>` and `<unit>` and no space at the end of the string.)
+#    Make sure that the method returns the object invisibly by adding `invisible(x)` at the end.
+#    The `"<distance>"` should be substituted by the number when instantiating `distance`.
+#    The default unit should be `m`.
+#    Create an instance of `distance` called `dist1` using `x = 10` and then print `dist1`.
+## Do not modify this line!
+
+new_distance=function(x, units="m"){
+  stopifnot(is.numeric(x))
+  stopifnot(is.character(units))  
+  attr(x,"units")=units
+  structure(x,class="distance")
+}
+distance=function(x,units="m"){
+  if(length(match.arg(units,c("mm","cm","m","km")))==1){
+    return(new_distance(x,units))
+  } else stop("Unknown unit.")
+}
+print.distance=function(x,...){
+  u=attr(x,"units")
+  if(length(x)==1){
+    result <- as.character(paste0("the distance is ",x," ",u))
+  } else {
+    v=paste0(x,collapse = " ")
+    result=as.character(paste0("the distances are ",v," ",u))
+  }
+  print(result)
+  invisible(x)
+}
+dist1 <- distance(10)
+print(dist1)
+
+# 2. Create a function `to_mm(x)` that takes in a distance and converts it to the equivalent distance
+#    in millimeters (i.e., it returns an object of class `distance`.
+#    (Hint: Use `attr()` to access the units and `switch` to convert them.
+#    Use `stop("Unknown unit.")` as default to specify the output when the input unit is not
+#    in the feasible domain. Do not use `if` and `else`.
+#    Use the helper function `distance()`to create the final object.)
+#    Create an instance of `distance` called `dist1_converted` by converting `dist1` to millimeters.
+## Do not modify this line!
+to_mm=function(x){
+ units=match.arg(attr(x,'units'),c("mm","cm","m","km"))
+ dist=switch(units,
+    mm=x,
+    cm=x*10,
+    m=x*1000,
+    km=x*1000*1000,
+    stop("Unknown unit."))
+ y=distance(dist,"mm")
+ return(y)
+}
+dist1_converted=to_mm(dist1)
+attributes(dist1_converted)
+
+
+# 3. Write a new function `c.distance` for the class `distance` that combines its arguments to form a vector
+#    of distances converted in millimeters.
+#    (Hint: note that the argument to the `c()` generic is `...`, and you can use `list(...)`
+#    to capture them. You can then use `sapply()` and `to_mm()` to first convert each distance in `list(...)`
+#    the list into millimeters.)
+#    Next, instantiate a new distance `dist2` of `20cm`.
+#    Concatenate `dist1` and `dist2` together using `c()` and store the distance vector into `dist_both`.
+## Do not modify this line!
+c.distance=function(...){
+  o=list(...)
+  first=sapply(o,to_mm)
+  return(distance(first,"mm"))
+}
+dist2=distance(20,"cm")
+dist_both=c(dist1,dist2)
+
+
+
+# 4. Write a new `mean.distance` function for the class `distance`
+#    that calculates the average distance of a distance vector in millimeters.
+#    (Hint: in the implementation of the function, first convert all elements in the list to millimeters.
+#    We can do that by simply call `to_mm(x)` because it is well defined for a distance object.
+#    Then convert the distance variable to numeric by `as.numeric`.
+#    Finally, since all the elements have been converted to numeric values,
+#    we can simply calculate the average of the list by calling `mean(x)` and return an object of class
+#    distance by calling the helper `distance()`.)
+#    After you define function `mean.distance`, calculate the mean `dist_both` and store it into `avg`.
+## Do not modify this line!
+mean.distance=function(x,...){
+  mm=to_mm(x)
+  mm=as.numeric(mm)
+  distance(mean(mm),"mm")
+}
+avg=mean.distance(dist_both)
+
+
+```
+
+```{r}
+# HW4: oop weight
+#'
+# In this exercise, we will create a class `weight`.
+#'
+# 1. Create a constructor `new_weight(x = double(), units = "kg")` that:
+#       - takes in a double `x` of length one,
+#       - a `units` attribute,
+#       - and initiates an object of class `weight` using `structure`.
+#    Don't forget to use `stopifnot` to check that `x` has the correct type and length.
+#    Because `units` might include `"lbs"` and `"kg"`, use `match.arg` to check the
+#    validy of the second argument.
+## Do not modify this line!
+
+new_weight=function(x=double(),units="kg"){
+	stopifnot(is.double(x),length(x)==1)
+	stopifnot(length(match.arg(units,c("kg","lbs")))==1)
+	attr(x,"units")=units
+	structure(x,class="weight")
+}
+
+# 2. Create a helper function `weight` for `new_weight`,
+#    which will convert `x` into a double using `as.double`.
+## Do not modify this line!
+weight=function(x=double(),units="kg"){
+	x=as.double(x)
+	new_weight(x,units)
+}
+
+
+# 3. Write a new `print` method for class `weight` that prints
+#    `"The weight is <weight> <units>"` using `print`.
+#    The `print` method should return the input invisibly.
+#    Create an instance of `weight` called `d1` using `x = 50`,
+#    `units = "lbs"` and then print `d1`.
+## Do not modify this line!
+print.weight=function(x,...){
+	units=attr(x,"units")
+	print(paste("The weight is",x,units))
+	invisible(x)
+}
+d1=weight(50,"lbs")
+attributes(d1)
+print.weight(d1)
+
+
+# 4. Write a generic function called `convert(x)` :
+#    If the units of `x` is `"lbs"`, it should return a weight object using `weight()`
+#    corresponding to `x` converted to `"kg"`.
+#    If the units of `x` is `"kg"`, it should return a weight object using `weight()`
+#    corresponding to `x` converted to `"lbs"`.
+#    For this exercise, assume that 1 kilogram corresponds to 2.2 pounds.
+#    Call this new method to instance `d1`, save the return object into `d2`.
+## Do not modify this line!
+convert=function(x){
+	UseMethod("convert")
+}
+convert.weight=function(x){
+	units=attr(x,"units")
+	if (units == "lbs"){
+		return(weight(x/2.2,units))
+	}
+	if (units == "kg"){
+		return(weight(x*2.2,units))
+	}
+}
+d2=convert(d1)
+
+
+
+# 5. Write a `+` method for the `weight` class.
+#    Note that arithmetic operators take two arguments: `x` and `y`.
+#    Assume that the return units is the unit of `x`.
+#    In other words, if `x` is in `"kg"`, then `x + y` should be an object of class
+#    weight in `"kg"`. Take care of this by converting `y` to the right units if
+#    necessary.
+#    In this exercise, after `y` as been converted if necessary,
+#    you should NOT use `unclass()`. Instead, delegate the work to the `+`
+#    operators of the base type (`double`) using `NextMethod("+")`.
+#'
+## Do not modify this line!
+`+.weight`=function(x,y){
+  unitsx=attr(x,"units")
+  unitsy=attr(y,"units")
+  if(unitsx == unitsy){
+	  weight(d1[1]+d2[1],unitsx)
+  }
+  else{
+    y=convert(y)
+    NextMethod("+")
+  }
+}
+
+```
+
+```{r}
+# HW4: Author and Book OOP
+#'
+# In this exercise we will create an `author` class to model a book's author.
+#'
+# 1. Create a constructor `new_author` for an `author` class to model a book's
+# author.
+# It should take as input two strings: `name`, `email`.
+# It should check that the inputs are both strings (using `stopifnot`).
+# Also check that the `email` contains a `@` sign (using `stopifnot` and
+# `grepl`).
+# The constructor should then create a named list with the two strings (first
+# element is the name - called `"name"` and second element is the email -
+# called `"email"`) and use `structure` with this list to create an object of
+# class `author`.
+## Do not modify this line!
+new_author=function(name,email){
+  stopifnot(is.character(name),is.character(email))
+  stopifnot(grepl("@",email))
+  print(name)
+  structure(list("name"=name,"email"=email),class="author")
+}
+
+
+# 2. Create a helper `author` that wraps `new_author`. It should have default
+# values for `name` (`"John Doe"`) and `email` (`"unknown@unknown"``), return
+# an error if the length of the arguments is not 1 and cast them to characters
+# before calling `new_author` using `as.character`.
+# Create an author object using the `author` helper with name `Susan Barker`
+# and email `susan.barker@mail.com` and store it in variable `author_example`.
+## Do not modify this line!
+author=function(name="John Doe",email="unknown@unknown"){
+	stopifnot(length(name) == 1,length(email)== 1)
+	name=as.character(name)
+	email=as.character(email)
+	new_author(name,email)
+}
+author_example=author("Susan Barker","susan.barker@mail.com")
+
+
+# 3. Create 2 functions `get_name` and `get_email` which take an `author`
+# object named `author_object` as input: `get_name` should return the name
+# of the author, `get_email` should return the email address of the author.
+# Then, create a generic `change_email` which takes an `author` object named
+# `author_object` along with a string `email` as inputs. Implement the method
+# for objects of the class author (i.e., write `change_email.author`) so that
+# the method returns a new `author` object with the name of the input `author_object`
+# and the input email address.
+## Do not modify this line!
+get_name=function(author_object){
+	author_object$name
+}
+get_email=function(author_object){
+	author_object$email
+}
+change_email=function(author_object,email){
+	UseMethod("change_email",object=author_object)
+}
+
+change_email.author=function(author_object,email){
+	author(get_name(author_object),email)
+}
+
+
+# 4. Change the email address of `author_example` to `s.barker@mail.com`
+## Do not modify this line!
+author_example=change_email(author_example,"s.barker@mail.com")
+
+
+# 5. Create a method `print.author` that prints the string
+# `"Author <name>, e-mail: <email>"` where `<name>` and `<email>` are the
+# strings corresponding to name and email of the `author` object. You should
+# use the functions `print` and `paste0` to do so. Note that:
+#    - the arguments of print are `x` and `...`, but `...` won't be used
+#    in the body of `print.author`,
+#    - print.author` method should return the first argument invisibly.
+#'
+## Do not modify this line!
+print.author=function(x,...){
+	name=get_name(x)
+	email=get_email(x)
+	print(paste0("Author ",name,", e-mail: ", email))
+	invisible(x)
+}
+```
+
+```{r}
+# hw4_oop4
+#'
+# In this exercise, we will create a class `shakeshack_order`.
+#'
+# 1. Create a constructor `new_shakeshack_order(names, prices)` that:
+#     - takes in a vector of `names`
+#     - a vector of `price` attribute whose type is double.
+#     - instanciates an object of class `shakeshack_order` using `structure`.
+#     - and it should be a list with 2 elements: `names` and `prices`.
+# Note: Use `stopifnot` to check the input.
+# Use `new_shakeshack_order(names, prices)` to create a helper function `shakeshack_order`
+# that coerces the arguments `names` and `prices` respectively to string and numeric
+# using `as.character` and `as.double`.
+## Do not modify this line!
+new_shakeshack_order=function(names,prices){
+	stopifnot(is.numeric(prices),is.character(names))
+	structure(list("names"=names,"prices"=prices),class="shakeshack_order")
+}
+shakeshack_order=function(names,prices){
+	names=as.character(names)
+	prices=as.double(prices)
+	new_shakeshack_order(names,prices)
+}
+
+
+# 2. Write a new `sum(..., na.rm = FALSE)` method for the class `shakeshack_order` that
+# returns the sum of the prices in a given order. Note that:
+#    - the `sum` generic can take more than one argument via `...`, and you can capture
+#    it using `list(...)`.
+#    - the `na.rm` argument should be used to provide a way to sum
+#    when some prices are not available.
+# For instance, the following code should work without error:
+# ```
+# o <- shakeshack_order(c("shack burger", "fries"), c(5, 2))
+# o2 <- shakeshack_order(c("fries", "coke"), c(2, NA))
+# sum(o)
+# sum(o, o2)
+# sum(o, o2, na.rm = TRUE)
+# ```
+# The first sum should be equal to 7, the second to `NA`, and the third to 9.
+# Do NOT use a `for`, `while` or `repeat` loop!
+# (Hint: a nice solution could use a combination of `map` and `reduce`.)
+## Do not modify this line!
+
+library(purrr)
+sum.shakeshack_order=function(...,na.rm=FALSE){
+  a=list(...)
+  if (na.rm == T){
+    nafree <- map(a,~sapply(.x$prices, function(x) replace(x, is.na(x), 0)))
+    #print(nafree)
+    lans=map(nafree,~reduce(.x,`+`))
+    reduce(unlist(lans),`+`)
+  }
+  else{
+    lans=map(a,~reduce(.x$prices,`+`))
+    reduce(unlist(lans),`+`)
+  }
+}
+o=shakeshack_order(c("shack burger", "fries"), c(5, 2))
+
+
+# 3. Write a new `print` method for the class `shakeshack_order` that prints
+# `"Your order is <names>. The total price is sum(<prices>)."` using `print`.
+# If `length(names)` is larger than one (e.g., 3), the function should print
+# `"Your order is <names[1]>, <names[2]>, <names[3]>. The total price is sum(<prices>)."`
+# For instance, printing the order `o` describe above should output
+# `"Your order is shack burger. The total price is $5.29."`.
+# Note that:
+#    - The `print` method should return the input invisibly.
+#    - The arguments of print are `x` and `...`, but `...` won't be used in the
+#    body of `print.shakeshack_order`.
+## Do not modify this line!
+print.shakeshack_order=function(x, ...){
+	name=x$names
+	if (length(name) > 1){
+		price=sum(x,na.rm=T)
+		v=paste0(name,collapse=", ")
+		print(paste0("Your order is ", v,". The total price is $",price, "."))
+	}
+	else{
+		price=sum(x,na.rm=T)
+		print(paste0("Your order is ", name, ". The total price is $",price,"."))
+	}
+	invisible(x)
+}
+
+
+# 4. Now, you need to create a combine operator for the class `shakeshack_order`.
+# For example, `c(o, o2)` should equal
+# `shakeshack_order(names = c('shack burger', 'fries', 'fries', 'coke'), prices = c(5, 2, 2, NA))`.
+# Similarly as for `sum.shakeshack_order`, the `...` argument of `c.shakeshack_order`
+# can be captured using `list(...)`.
+# Do NOT use a `for`, `while` or `repeat` loop!
+# (Hint: a nice solution could use a combination of `map2` and `reduce`.)
+#'
+## Do not modify this line!
+
+c.shakeshack_order=function(...){
+  a=list(...)
+  name=unlist(map(a,~reduce(.x$names,append)))
+  prices=unlist(map(a,~reduce(.x$prices,append)))
+  shakeshack_order(name,prices)
+}
+```
+
+```{r}
+# HW4: OOP_account
+#'
+# In this exercise, we will create a class `account`.
+#'
+# 1. Create a constructor `new_account(number)` that takes in a length 2 numeric
+#    vector and initiates an object of class `account` using `structure`.
+#    Class `account` should have an attribute `units` which is always the character vector `c('USD', 'EUR')`.
+#    The value should be the amount of money in each currency.
+#    Don't forget to use `stopifnot` to check if `number` is numeric or not and if the length of number is different from 2.
+#    For example, `new_account(c(5, 0))` will create an account with 5 USD.
+#    `new_account(c(0, 5))` will create an account with 5 EUR.
+#    `new_account(c(5, 10))` will create an account with 5 USD and 10 EUR.
+## Do not modify this line!
+
+new_account=function(number){
+  stopifnot(is.numeric(number))
+  stopifnot(length(number)==2)
+  attr(number,"values")=number
+  attr(number,"units")=c("USD","EUR")
+  structure(number,class="account")
+}
+
+# 2. Use `pmatch` to reate a function `get_unit_index(units)` to get the index of input `units` in `c('USD, 'EUR')`.
+#    You are supposed to use this function in the following questions.
+#    For example, `get_unit_index('EUR') = 2`. `get_unit_index('US') = 1`.
+#    `get_unit_index('U','E') = c(1, 2)`.
+## Do not modify this line!
+get_unit_index=function(units){
+  pmatch(units,c("USD","EUR"))
+}
+
+
+# 3. Create a helper function `account(number, units)` that takes in a scalar or vector `number`
+#    with corresponding `units` which initiates an object of class `account`.
+#    `units` might include `EUR`, `USD`.
+#    For example, `account(5, 'USD')` will create an account with 5 USD.
+#    `account(5, 'EUR')` will create an account with 5 EUR.
+#    `account(c(5, 10), c('EUR', 'USD'))` will create an account with 5 EUR and 10 USD.
+#    Create an account with 100 USD and 100 EUR. Save it as `my_account`.
+## Do not modify this line!
+account=function(number, units) {
+  amounts=c(0,0)
+  if (length(units) < 2) {
+    amounts[get_unit_index(units)]=number
+  }
+  else {
+    if (get_unit_index(units)[1]==1) amounts=number
+    else amounts=rev(number)
+  }
+  new_account(amounts)
+}
+my_account=account(c(100,100), c('USD','EUR'))
+
+
+# 4. Creat two generic functions `deposit(account, number, units)` and `withdraw(account, number, units)`
+#    that takes in a scalar or vector `number` with corresponding `units`.
+#    `units` might include `EUR`, `USD`.
+#    Methods `deposit.account` and `withdraw.account` should return an object of class `account` with correct amounts.
+#    Deposit 50 USD and withdraw 50 EUR for `my_account`.
+## Do not modify this line!
+deposit = function(account,number,units){
+  UseMethod("deposit")
+}
+withdraw = function(account,number,units){
+  UseMethod("withdraw")
+}
+
+deposit.account = function(account,number,units){
+  unit = get_unit_index(units)
+  newnumb = as.numeric(paste(account))
+  if (length(unit)==2){
+    if (unit[1]==1){
+      account(newnumb+number,units)
+    }
+    else{
+      new_account(newnumb+rev(number))
+    }
+  }
+  else{
+    if(unit==1){
+      newnumb[1] = newnumb[1]+number
+      account(newnumb,c("USD","EUR"))
+    }
+    else{
+      newnumb[2] = newnumb[2]+number
+      account(newnumb,c("USD","EUR"))
+    }
+  }
+}
+
+my_account = deposit.account(my_account,50,"USD")
+my_account
+withdraw.account = function(account,number,units){
+  unit = get_unit_index(units)
+  newnumb = as.numeric(paste(account))
+  if (length(unit)==2){
+    if (unit[1]==1){
+      account(newnumb-number,units)
+    }
+    else{
+      new_account(newnumb-rev(number))
+    }
+  }
+  else{
+    if(unit==1){
+      newnumb[1] = newnumb[1]-number
+      account(newnumb,c("USD","EUR"))
+    }
+    else{
+      newnumb[2] = newnumb[2]-number
+      account(newnumb,c("USD","EUR"))
+    }
+  }
+}
+
+my_account = withdraw(my_account,50,"EUR")
+my_account
+
+
+# 5. Write a new `summary` method for class `account`. `summary(account, units)` should return a named vector
+#    which has the same length and names as `units`.
+#    The reurn value should be the total amount of the `account` in `units`.
+#    For simplicity, 1 EUR = 1.1 USD.
+#    For example, `summary(my_account, c('USD', 'EUR'))` should return a named vector with values `c(150, 50)`.
+#    `summary(my_account, 'USD')` should return a named vector with value `205`.
+## Do not modify this line!
+summary = function(account,units){
+  UseMethod("summary")
+}
+
+summary.account = function(account, units) {
+  vec = get_unit_index(units)
+  if(length(vec)==1) {
+    if(vec==1) {
+      #USD
+      value = account[2]*1.1000+account[1]
+      return(c("USD"=value))        
+      
+    } else {
+      #EUR
+      value = account[1]/1.1000+account[2]
+      return(c("EUR"=value))
+    } 
+  } else {
+    if(vec[1]==1 & vec[2]==2) {
+      #USD EUR
+      return(c("USD"=account[1],"EUR"=account[2]))        
+    } else {
+      #EUR USD
+      return(c("EUR"=account[2],"USD"=account[1]))    
+    }
+  }
+}
+
+
+# 6. Now let's consider a subclass `minimum_balance_account` which should maintain a pre-determined minimum balance.
+#    Create a constructor `new_minimum_balance_account(number, minimum)` that takes in legnth 2 numeric vectors and
+#    initiates an object of subclass `minimum_balance_account` using `structure`.
+#    Subclass `minimum_balance_account` should have an attribute `units` which is always
+#    the character vector `c('USD', 'EUR')` and an attribute `minimum` which is a numeric vector.
+#    The value should be the amount of money in each currency.
+#    Don't forget to use `sopifnot` to check if `number` and `minimum` are numeric or not.
+#    For example, `new_minimum_balance_account(c(5, 0), c(1, 0))` will create an account
+#    with 5 USD and minimum balance 1 USD.
+## Do not modify this line!
+new_minimum_balance_account=function(number,minimum){
+  stopifnot(is.numeric(minimum))
+  stopifnot(is.numeric(number))
+  stopifnot(length(number)==2,length(minimum)==2)
+  units=c('USD', 'EUR')	
+  structure(
+    number,
+    class=c('minimum_balance_account','account'),
+    units=units,
+    minimum=minimum
+  )
+}
+
+
+# 7. Create a helper function `minimum_balance_account(number, units, minimum, minimum_units)`
+#    that takes in a scalar or vector `number` and `minimum`
+#    with corresponding `units` and `minimum_units` which initiates an object of subclass `minimum_balance_account`.
+#    `units` and `minimum_units` might include `EUR`, `USD`.
+#    For example, `minimum_balance_account(5, 'USD', 1, 'USD')` will create an account
+#    with 5 USD and minimal balance 1 USD.
+## Do not modify this line!
+minimum_balance_account = function(number,units,minimum,minimum_units){
+  zero = c(0,0)
+  zero2 = c(0,0)
+  if (length(number)==2 && length(minimum)==2){
+    if (get_unit_index(units)[1] == 1 && get_unit_index(minimum_units)[1]==1) {
+      new_minimum_balance_account(number,minimum)
+    }
+    else if(get_unit_index(units)[1] ==1){
+      new_minimum_balance_account(number,rev(minimum))
+    }
+    else if(get_unit_index(minimum_units)[1]==1) {
+      new_minimum_balance_account(rev(number),minimum)
+    }
+    else{
+      new_minimum_balance_account(rev(number),rev(minimum))
+    }
+  }
+  else if (length(number)==1 && length(minimum)==1){
+    zero[get_unit_index(units)] = number
+    zero2[get_unit_index(minimum_units)] = minimum
+    new_minimum_balance_account(zero,zero2)
+  }
+  else{
+    if (length(number) > length(minimum)){
+      zero[get_unit_index(minimum_units)] = minimum
+      new_minimum_balance_account(number,zero)
+    }
+    else{
+      zero[get_unit_index(units)] = number
+      new_minimum_balance_account(zero,minimum)
+    }
+  }
+}
+
+x =minimum_balance_account(c(100,100),c("USD","EUR"),c(11,11),c("USD","EUR"))
+deposit(x,100,c("EUR","USD"))
+
+
+# 8. Add method for `withdraw` and modify `deposit.account` if needed such that:
+#    a. The returned value should be the same class of input `account`.
+#    b. Function `deposit` can accpet `minimum_balance_account` and return correct object.
+#    c. If withdraw will cause the balance lower than the minimum balance,
+#       report an error 'Minimum balance must be maintained.'.
+#    d. Use `withdraw.account` in `withdraw.minimum_balance_account`.
+## Do not modify this line!
+
+withdraw.minimum_balance_account = function(minimum_balance_account, number, units){
+  indexs = get_unit_index(units)
+  num = c(0,0)
+  num[indexs] = number
+  cur = as.numeric(paste(minimum_balance_account))
+  new = cur - num
+  min = attr(minimum_balance_account, "minimum")
+  if(any(new<min)){
+    stop('Minimum balance must be maintained.')
+  }
+  else{
+    return(withdraw.account(minimum_balance_account, num, c("USD", "EUR")))
+  }
+}
+```
+
