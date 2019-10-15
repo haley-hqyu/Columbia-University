@@ -1,0 +1,2101 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Huiqian Yu
+---
+
+HW5 for SCIDS
+
+problem 1
+```{r}
+# HW5:dplyr
+# 1. Load the `tidyr`, `dplyr` and `readr` packages.
+#    Use `read_csv` to load the `abalone.csv` data set from `data` folder and
+#    assign it to a tibble `abalone`.
+#    Note: all manipulations should be done by `%>%`.
+## Do not modify this line!
+library(tidyr)
+library(dplyr)
+library(readr)
+abalone <- "data/abalone.csv" %>% read_csv()
+
+# 2. Extract a tibble `length_sex_ring` of dimension 1216 x 4
+#    which contains the `sex`, `diameter`, `height` and `rings` columns.
+#    The dataset should be filtered for length strictly larger than 0.6 and
+#    be sorted by increasing `sex` and decreasing `ring`.
+#    To do that, you can use:
+#      - `filter` to select rows that have `length` larger than 0.6.
+#      - `arrange` to arrange data set by sex with first `"F"` then `"I"` and `"M"`,
+#      and descending order of `ring`.
+#      - `select` to select columns `sex`, `diameter`, `height` and `rings`.
+#    To check your solution, `length_sex_ring` prints to:
+#    # A tibble: 1,216 x 4
+#    sex   diameter height rings
+#    <chr>    <dbl>  <dbl> <dbl>
+#    1 F        0.585  0.185    29
+#    2 F        0.49   0.215    25
+#    3 F        0.54   0.215    24
+#    4 F        0.47   0.2      23
+#    5 F        0.52   0.225    23
+#    6 F        0.63   0.195    23
+#    7 F        0.525  0.215    22
+#    8 F        0.485  0.19     21
+#    9 F        0.42   0.165    21
+#    10 F        0.55   0.2      21
+#    # … with 1,206 more rows
+## Do not modify this line!
+length_sex_ring <- abalone %>% filter(length>0.6) %>% select(sex,diameter,height,rings) %>% arrange(sex,desc(rings))
+
+
+# 3. Extract a tibble `count_prop` of dimension 3 x 3,
+#    which contains the `sex`, `count` and `prop` columns.
+#    The dataset should be grouped by increasing `sex` with counted numbers
+#    of each group. Then calculate the proportion of each count.
+#    To do that, you can use
+#      - `count` to count cases and make name as `count`.
+#      - `mutate` to make a new column and name it `prop`, let `prop` be
+#      `count / sum(count)`.
+#    To check your solution, `count_prop` prints to:
+#    # A tibble: 3 x 3
+#    sex   count  prop
+#    <chr> <int> <dbl>
+#    1 F      1307 0.313
+#    2 I      1342 0.321
+#    # … with 1 more row
+## Do not modify this line!
+
+count_prop <- abalone %>%count(sex,name="count")%>% mutate(prop = count/sum(count))
+
+# 4. Extract a tibble `mean_max_min` of dimension 3 x 4,
+#    which contains the `sex`, `weight_mean`, `weight_max` and `weight_min` columns.
+#    The dataset should be grouped by increasing `sex` and summarized by
+#    finding mean, max and min of `shucked_weight`.
+#    To do that, you can use
+#      - `group_by` to group data set by `sex` with first `"F"` then `"I"` and `"M"`.
+#      - `summarize` to to collapse all values into three new columns:
+#      `weight_mean`, `weight_max` and `weight_min`.
+#      `weight_mean` should be mean of `shucked_weight`.
+#      `weight_min` should be min of `shucked_weight`.
+#      `weight_max` should be max of `shucked_weight`.
+#    To check your solution, `mean_max_min` prints to:
+#    # A tibble: 3 x 4
+#    sex   weight_mean weight_max weight_min
+#    <chr>       <dbl>      <dbl>      <dbl>
+#    F           0.446      1.49      0.031
+#    I           0.191      0.774     0.001
+#    # … with 1 more row
+## Do not modify this line!
+
+mean_max_min <-abalone %>% group_by(sex) %>%summarise(weight_mean = mean(shucked_weight), weight_max = max(shucked_weight),weight_min = min(shucked_weight))
+
+# 5. Extract a tibble `filter_na_rename_select_everything` of dimension 2963 x 10,
+#    which contains all columns.
+#    The dataset should be flitered for diameter is NA or strictly greater than 0.36.
+#    The column `X` should be renamed as `index`.
+#    You should also rearrange `index`, `sex`, `length`, `diameter` and `rings`.
+#    to first five columns and keep all the columns.
+#    To do that, you can use
+#      - `filter` to select rows that `diameter` is `na` or greater than 0.36.
+#      - `rename` to rename `X` as `index`.
+#      - `select` and `everything` to select all columns with first five columns
+#      as `index`, `sex`, `length`, `diameter` and `rings`.
+#    To check your solution, `filter_na_rename_select_everything` prints to:
+#    # A tibble: 2,963 x 10
+#    index sex   length diameter rings height whole_weight shucked_weight
+#    <dbl> <chr>  <dbl>    <dbl> <dbl>  <dbl>        <dbl>          <dbl>
+#    1      M      0.455    0.365    15  0.095        0.514          0.224
+#    2      F      0.53     0.42      9  0.135        0.677          0.256
+#    3      M      0.44     0.365    10  0.125        0.516          0.216
+#    4      F      0.53     0.415    20  0.15         0.778          0.237
+#    5      F      0.545    0.425    16  0.125        0.768          0.294
+#    6      M      0.475    0.37      9  0.125        0.509          0.216
+#    7      F      0.55     0.44     19  0.15         0.894          0.314
+#    8      F      0.525    0.38     14  0.14         0.606          0.194
+#    9      M      0.49     0.38     11  0.135        0.542          0.218
+#    10     F      0.535    0.405    10  0.145        0.684          0.272
+#    # … with 2,953 more rows, and 2 more variables: viscera_weight <dbl>,
+#     shell_weight <dbl>
+## Do not modify this line!
+
+filter_na_rename_select_everything <- abalone %>% filter(diameter>.36|is.na(diameter))%>%rename("index"=X)%>%select(`index`, `sex`, `length`, `diameter` , `rings`,everything())
+
+# 6. Extract a tibble `transmute` of dimension 4177 x 2,
+#    which contains the `whole_weight_in_mg` and `water_weight_in_mg` columns.
+#    The dataset should build two new columns. The first column transfers
+#    `whole_weight` into mg. The second column calculate water weight and also in
+#    mg.
+
+
+
+#    To do that, you can use:
+#      - `transmute` to only keep two variables `whole_weight_in_mg` and
+#      `water_weight_in_mg`. `whole_weight_in_mg` is `whole_weight` times 1000.
+#      `water_weight_in_mg` is `whole_weight` minus all other weights then times 1000.
+#    To check your solution, `transmute` prints to:
+#    # A tibble: 4,177 x 2
+#    whole_weight_in_mg water_weight_in_mg
+#    <dbl>              <dbl>
+#    514               38.5
+#    226.               7.50
+#    677               69.
+#    516               31.5
+#    205               21.0
+#    352.              13.
+#    778.              69
+#    768               64.5
+#    509.              15.5
+#    894.             109.
+#    # … with 4,167 more rows
+## Do not modify this line!
+transmute <- abalone %>% transmute("whole_weight_in_mg"= whole_weight*1000,"water_weight_in_mg"= (2*whole_weight-abalone%>%select(abalone%>%select(contains("weight"))%>%colnames())%>%rowSums() )*1000) 
+
+
+# 7. Extract a tibble `first_1000_rank` of dimension 1000 x 3,
+#    which contains the `diameter`, `rings` and `rings_rank` columns, sorted
+#    by ascending `rings_rank`, which is a column containing the rank
+#    corresponding to the value of the `rings` variable.
+#    The dataset should select the three columns and rank on the `rings`. Then
+#    it should be filtered for first 1000 `rings_rank`.
+
+
+#    To do that, you can use
+#      - `select` to select out `diameter` and `rings`.
+#      - `mutate` and `row_number` to rank `rings`. Name the new column as `rings_rank`.
+#      - `filter` to filter out `rings_rank` less than or equal to `1000`.
+#      - `arrange` by `rings_rank`.
+#    To check your solution, `first_1000_rank` prints to:
+#    # A tibble: 1,000 x 3
+#    diameter rings rings_rank
+#    <dbl> <dbl>      <int>
+#    1    0.055     1          1
+#    2    0.1       2          2
+#    3    0.1       3          3
+#    4    0.09      3          4
+#    5    0.12      3          5
+#    6    0.15      3          6
+#    7    0.11      3          7
+#    8    0.11      3          8
+#    9   NA         3          9
+#    10    0.15      3         10
+#    # … with 990 more rows
+## Do not modify this line!
+
+first_1000_rank <- abalone %>% select(diameter, rings) %>% mutate(rings_rank =row_number(rings))%>%arrange(rings_rank)%>%filter(rings_rank<=1000)
+
+# 8. Extract a tibble `n_distinct_rings_by_sex` of dimension 3 x 2,
+#    which contains the `sex` and `distinct_rings` columns.
+#    The dataset should be grouped by `sex` and then summarized to count distinct
+#    rings of each group.
+#    To do that, you can use
+#      - `group_by` to group data set by `sex` with first `"F"` then `"I"` and `"M"`.
+#      - `summarize` to build a new column called `distinct_rings`.
+#      -`n_distinct` to count number of distinct rings of each group and assign
+#      values to `distinct_rings`.
+#      To check your solution, `first_1000_rank` prints to:
+#      # A tibble: 3 x 2
+#      sex   distinct_rings
+#      <chr>          <int>
+#      F                 23
+#      I                 21
+#      # … with 1 more row
+## Do not modify this line!
+n_distinct_rings_by_sex <- abalone %>% group_by(sex)%>%summarise(distinct_rings=n_distinct(rings))
+
+
+```
+problem 2
+
+```{r}
+# HW5: tidyr
+#'
+# 1. Load the `tidyr`, `dplyr` and `readr` packages.
+#    Use `read_csv` to load the `useR2016.csv` data set from `data` folder and
+#    save it as `useR2016`.
+library(tidyr)
+library(dplyr)
+library(readr)
+useR2016 <- read_csv("data/useR2016.csv")
+t1 <- as_tibble(useR2016%>%select(Q2:Q13_F,-Q12,Q25))
+
+#    Use `select` to select columns `Q2` to `Q13_F` except `Q12`, and column `Q25`
+#    as well. Save the selected dataset into a tibble `t1` of dimension 455 x 12.
+
+
+#    To check your solution, `t1` prints to:
+#    # A tibble: 455 x 12
+#    Q2    Q3     Q7     Q8     Q11    Q13    Q13_B  Q13_C  Q13_D Q13_E Q13_F    Q25
+#    <chr> <chr>  <chr>  <chr>  <chr>  <chr>  <chr>  <chr>  <chr> <chr> <chr>  <dbl>
+#    Men   > 35   Docto… Acade… > 10 … I use… I wri… I wri… NA    NA    NA       442
+#    Men   > 35   Maste… Non-a… 2-5 y… NA     NA     NA     NA    NA    NA       665
+#    Women 35 or… Maste… Non-a… < 2 y… I use… NA     NA     NA    NA    NA       118
+#    Men   35 or… Docto… Acade… NA     NA     NA     NA     NA    NA    NA       906
+#    Men   35 or… Maste… Non-a… 2-5 y… I use… I wri… I wri… NA    NA    NA       650
+#    Women 35 or… Docto… Non-a… 5-10 … I use… I wri… I wri… NA    I ha… NA       800
+#    Men   > 35   Docto… Non-a… > 10 … I use… I wri… I wri… I co… I ha… I hav…    83
+#    Women NA     Docto… Non-a… > 10 … I use… I wri… I wri… NA    I ha… NA       668
+#    Women > 35   Docto… Acade… > 10 … I use… NA     I wri… I co… NA    NA       566
+#    Men   35 or… Maste… Non-a… 2-5 y… I use… I wri… I wri… NA    I ha… I hav…   416
+#    # … with 445 more rows
+## Do not modify this line!
+
+
+
+# 2. Build a tibble `t1_longer` of dimension 1767 x 8, which contains columns
+#    `Q2`, `Q3`, `Q7`, `Q8`, `Q11`, `Q25`, `cases` and `comments`.
+#    `cases` are reprensented by `Q13`, `Q13_B`, `Q13_C`, `Q13_D`, `Q13_E`, `Q13_F`,
+#    and `comments`are the values contained in these columns, without the `NA` values.
+
+t1_longer<-t1%>%pivot_longer(cols=Q13:Q13_F,
+                             names_to="cases",
+                             values_to="comments",
+                             values_drop_na=TRUE)
+
+#    To do that, you can use:
+#      - `pivot_longer` to gather `t1` from `Q13` to `Q13_F`.
+#      - `names_to` as 'cases' and `values_to` as 'comments' and also drop all NAs
+#      (hint: look at the `values_drop_na` argument).
+#    To check your solution, `t1` prints to:
+#    # A tibble: 1,767 x 8
+#    Q2    Q3      Q7         Q8      Q11      Q25 cases comments
+#    <chr> <chr>   <chr>      <chr>   <chr>  <dbl> <chr> <chr>
+#    Men   > 35    Doctorate… Academ… > 10 …   442 Q13   I use functions from exist…
+#    Men   > 35    Doctorate… Academ… > 10 …   442 Q13_B I write R code designed to…
+#    Men   > 35    Doctorate… Academ… > 10 …   442 Q13_C I write R functions for us…
+#    Women 35 or … Masters o… Non-ac… < 2 y…   118 Q13   I use functions from exist…
+#    Men   35 or … Masters o… Non-ac… 2-5 y…   650 Q13   I use functions from exist…
+#    Men   35 or … Masters o… Non-ac… 2-5 y…   650 Q13_B I write R code designed to…
+#    Men   35 or … Masters o… Non-ac… 2-5 y…   650 Q13_C I write R functions for us…
+#    Women 35 or … Doctorate… Non-ac… 5-10 …   800 Q13   I use functions from exist…
+#    Women 35 or … Doctorate… Non-ac… 5-10 …   800 Q13_B I write R code designed to…
+#    Women 35 or … Doctorate… Non-ac… 5-10 …   800 Q13_C I write R functions for us…
+#    # … with 1,757 more rows
+## Do not modify this line!
+
+
+
+# 3. Build a tibble `t1_longer_rename` of dimension 1767 x 8.
+#    You may use `rename` to rename `t1_longer`.
+#    - Assign `sex` to `Q2`.
+#    - Assign `age` to `Q3`.
+#    - Assign `degree` to `Q7`.
+#    - Assign `academic_status` to `Q8`.
+#    - Assign `experience` to `Q11`.
+#    - Assign `value` to `Q25`.
+
+t1_longer_rename <- t1_longer %>% rename(sex=Q2,age=Q3,degree=Q7,acedemic_status=Q8,experience=Q11,value=Q25)
+
+#    To check your solution, `t1_longer_rename` prints to:
+#    # A tibble: 1,767 x 8
+#    sex   age    degree    academic_status experience value cases comments
+#    <chr> <chr>  <chr>     <chr>           <chr>      <dbl> <chr> <chr>
+#    Men   > 35   Doctorat… Academic        > 10 years   442 Q13   I use functions …
+#    Men   > 35   Doctorat… Academic        > 10 years   442 Q13_B I write R code d…
+#    Men   > 35   Doctorat… Academic        > 10 years   442 Q13_C I write R functi…
+#    Women 35 or… Masters … Non-academic    < 2 years    118 Q13   I use functions …
+#    Men   35 or… Masters … Non-academic    2-5 years    650 Q13   I use functions …
+#    Men   35 or… Masters … Non-academic    2-5 years    650 Q13_B I write R code d…
+#    Men   35 or… Masters … Non-academic    2-5 years    650 Q13_C I write R functi…
+#    Women 35 or… Doctorat… Non-academic    5-10 years   800 Q13   I use functions …
+#    Women 35 or… Doctorat… Non-academic    5-10 years   800 Q13_B I write R code d…
+#    Women 35 or… Doctorat… Non-academic    5-10 years   800 Q13_C I write R functi…
+#    # … with 1,757 more rows
+## Do not modify this line!
+
+
+
+# 4. Extract a tibble `separate_drop_redundant` from `t1_longer_rename` of dimension 1767 x 8.
+#    This tibble doesn't contain the column `cases` anymore but the column `category`.
+#    It is equal to `A` if `cases = Q13`, `B` if `cases = Q13_B`, `C` if `cases = Q13_C`
+#    To do that you can separate `cases` into 2 columns called `case_name` and `category`
+#    fill in NAs with `A` in `category`, and then delete `case_name`.
+
+separate_drop_redundant <- t1_longer_rename %>% separate(cases,into=c("case_name","category")) %>% replace_na(list(category="A")) %>% select(-case_name)
+
+
+#    You may use:
+#      - `separate` to separate column `cases` into `case_name` and `category`
+#      from `t1_longer_rename`. Set `fill` as `right` and look at the `sep` argument.
+#      - `replace_na` with `list(category = 'A')` to replace all NAs in `category` to `A`.
+#      - `select` to drop column `case_name`.
+#    To check your solution, `separate_drop_redundant` prints to:
+#    # A tibble: 1,767 x 8
+#    sex   age    degree   academic_status experience value category comments
+#    <chr> <chr>  <chr>    <chr>           <chr>      <dbl> <chr>    <chr>
+#    Men   > 35   Doctora… Academic        > 10 years   442 A        I use function…
+#    Men   > 35   Doctora… Academic        > 10 years   442 B        I write R code…
+#    Men   > 35   Doctora… Academic        > 10 years   442 C        I write R func…
+#    Women 35 or… Masters… Non-academic    < 2 years    118 A        I use function…
+#    Men   35 or… Masters… Non-academic    2-5 years    650 A        I use function…
+#    Men   35 or… Masters… Non-academic    2-5 years    650 B        I write R code…
+#    Men   35 or… Masters… Non-academic    2-5 years    650 C        I write R func…
+#    Women 35 or… Doctora… Non-academic    5-10 years   800 A        I use function…
+#    Women 35 or… Doctora… Non-academic    5-10 years   800 B        I write R code…
+#    Women 35 or… Doctora… Non-academic    5-10 years   800 C        I write R func…
+#    # … with 1,757 more rows
+## Do not modify this line!
+
+
+
+# 5. Extract a tibble `filter_na_unite` from `separate_drop_redundant`` of dimension 1764 x 7.
+#    The dataset should not contain any NAs in `age` and `experience` (It filters out `NA`).
+#    Then unite `age` and `experience` into  a column `age_and_experience` separated by ` && `.
+filter_na_unite <- separate_drop_redundant %>% filter(!is.na(age)&!is.na(experience))%>%unite(age_and_experience,age,experience,sep=" && ")
+
+
+
+#    To do that, you can use:
+#      - `filter` to filter out NAs in `age` and `experience` from `separate_drop_redundant`.
+#      - `unite` to unite `age` and `experience` into `age_and_experience`, make `sep` as ` && `.
+#    To check your solution, `filter_na_unite` prints to:
+#    # A tibble: 1,662 x 7
+#    sex   age_and_experien… degree academic_status value category comments
+#    <chr> <chr>             <chr>  <chr>           <dbl> <chr>    <chr>
+#    Men   > 35 && > 10 yea… Docto… Academic          442 A        I use fu…
+#    Men   > 35 && > 10 yea… Docto… Academic          442 B        I write …
+#    Men   > 35 && > 10 yea… Docto… Academic          442 C        I write …
+#    Women 35 or under && <… Maste… Non-academic      118 A        I use fu…
+#    Men   35 or under && 2… Maste… Non-academic      650 A        I use fu…
+#    Men   35 or under && 2… Maste… Non-academic      650 B        I write …
+#    Men   35 or under && 2… Maste… Non-academic      650 C        I write …
+#    Women 35 or under && 5… Docto… Non-academic      800 A        I use fu…
+#    Women 35 or under && 5… Docto… Non-academic      800 B        I write …
+#    Women 35 or under && 5… Docto… Non-academic      800 C        I write …
+#    # … with 1,652 more rows
+## Do not modify this line!
+
+
+
+# 6. Extract a tibble `first_100_rank` of dimension 100 x 8.
+#    The dataset should contain the 100 datapoints with highest `value`, and contain
+#    a column `row_number` that gives the rank of each datapoint (with 1 being the
+#    lowest `value` and 100 the highest)
+first_100_rank <- filter_na_unite%>%mutate("row_number"=row_number(value))%>%filter(row_number<=100)
+
+#    To do that, you can use
+#      - `mutate` and `row_number` to rank `value` from `filter_na_unite`.
+#      Name the new column as `row_number`.
+#      - `filter` to filter out `row_number` less than or equal to `100`.
+#    To check your solution, `first_100_rank` prints to:
+#    # A tibble: 100 x 8
+#    sex   age_and_experien… degree academic_status value category comments row_number
+#    <chr> <chr>             <chr>  <chr>           <dbl> <chr>    <chr>       <int>
+#    Men   > 35 && 5-10 yea… Docto… Non-academic       52 C        I write…       87
+#    Men   > 35 && > 10 yea… Docto… Academic           18 A        I use f…       14
+#    Men   > 35 && > 10 yea… Docto… Academic           18 B        I write…       15
+#    Men   > 35 && > 10 yea… Docto… Academic           18 C        I write…       16
+#    Men   > 35 && > 10 yea… Docto… Academic           18 D        I contr…       17
+#    Men   > 35 && > 10 yea… Docto… Academic           18 E        I have …       18
+#    Men   > 35 && > 10 yea… Docto… Academic           18 F        I have …       19
+#    Women > 35 && > 10 yea… Maste… Non-academic       22 A        I use f…       26
+#    Women > 35 && > 10 yea… Maste… Non-academic       22 B        I write…       27
+#    Women > 35 && > 10 yea… Maste… Non-academic       22 C        I write…       28
+#    # … with 90 more rows
+## Do not modify this line!
+
+
+
+# 7. Extract from `t1_longer_rename` a tibble `experience_percentage` of dimension 2 x 5,
+#    which contains a `sex` column and 4 additional columns representing the percentage
+#    of people per experience level, and 2 rows for `Men` and `Women`.
+#    The dataset should be grouped by `sex` with counted numbers
+#    of each experience level.
+#    Then the counts can be normalized into percentages.
+#    Some tidying will make a nice table to show the final numbers.
+experience_percentage<-t1_longer_rename%>%drop_na()%>%group_by(sex)%>%count(experience,name="count")%>%mutate(count=count/sum(count)*100)%>%pivot_wider(names_from = experience,values_from =count)
+
+
+#    To do that, you can use
+#      - `drop_na` to drop NAs on `df_longer`.
+#      - `group_by` using the `sex` variable.
+#      - `count` to count the cases per experience level and use
+#      the name argument as `count`.
+#      - `mutate` to normalize the `count` column into a percentage using
+#      `count / sum(count) * 100`.
+#      - `pivot_wider` to convert from a long table into a wide table.
+#    To check your solution, `experience_percentage` prints to:
+#    # A tibble: 2 x 5
+#    # Groups:   sex [2]
+#    sex   `< 2 years` `> 10 years` `2-5 years` `5-10 years`
+#    <chr>       <dbl>        <dbl>       <dbl>        <dbl>
+#    Men          6.90         36.0        25.0         32.1
+#    # … with 1 more row
+## Do not modify this line!
+
+
+
+
+
+```
+
+
+part3
+```{r}
+# HW5: dplyr2
+#'
+#    In this exercise, you will familiarize yourself with the verbs of `dplyr`.
+#    Throughout the exercise, use `%>%` to structure your operations.
+#    Do NOT use `for`, `while` or `repeat` loops.
+#'
+# 1. Load the package `readr` and use its function `read_csv()` to read the
+#    dataset `nations.csv` (located in directory `data/`).
+#    Store the corresponding dataframe into a tibble `nations`.
+#    Load the `dplyr` package.
+#    Use the `glimpse()` function to have a look at the data set.
+## Do not modify this line!
+library(readr)
+nations=(read_csv("data/nations.csv"))
+library(dplyr)
+glimpse(nations)
+# 2. From the `nations` in Q1, extract a tibble `longevity` of dimension 175 x 5
+#    that contains the `country`, `gdp_percap`, `life_expect`, `population` and
+#    `region` columns.
+#    The dataset should be filtered for `year` `2016` with non-null values in
+#    `life_expect` and `gdp_percap`.
+longevity <- nations %>% filter(year==2016 & !is.na(life_expect) & !is.na(gdp_percap))%>%select(country,gdp_percap,life_expect,population,region)
+
+
+#    To do this, you can use:
+#    (1) `filter()` to select rows with `year` as `2016` and non-NA `life_expect`
+#    and `gdp_percap` (hint: you can use `is.na()` to check for missing values).
+#    (2) `dplyr::select()` to include only `country`, `gdp_percap`, `life_expect`,
+#    `population` and `region` (side note: by doing `dplyr::`, we enforce the use
+#    of `dplyr`'s `select` to resolve function conflicts with other packages such
+#    as `MASS`).
+#    To check your solution, `longevity` prints to:
+#    # A tibble: 175 x 5
+#       country              gdp_percap life_expect population region
+#       <chr>                     <dbl>       <dbl>      <int> <chr>
+#     1 United Arab Emirates     72400.        77.3    9269612 Middle East & North Africa
+#     2 Afghanistan               1944.        63.7   34656032 South Asia
+#     3 Antigua and Barbuda      22661.        76.4     100963 Latin America & Caribbean
+#     4 Albania                  11540.        78.3    2876101 Europe & Central Asia
+#     5 Armenia                   8833.        74.6    2924816 Europe & Central Asia
+#     6 Angola                    6454.        61.5   28813463 Sub-Saharan Africa
+#     7 Argentina                19940.        76.6   43847430 Latin America & Caribbean
+#     8 Austria                  50552.        80.9    8731471 Europe & Central Asia
+#     9 Australia                46012.        82.5   24210809 East Asia & Pacific
+#    10 Azerbaijan               17257.        72.0    9757812 Europe & Central Asia
+#    # … with 165 more rows
+## Do not modify this line!
+
+
+
+# 3. From `longevity` in Q2, extract a tibble `ea_na_75_85` of dimension 15 x 5
+#    that contains the `country`, `gdp_percap`, `life_expect`, `population` and
+#    `region` columns.
+#    The dataset should be filtered for countries in `"East Asia & Pacific"` or
+#    `"North America"`, with `life_expect` between 75 and 85 (include the boundary
+#    points). It should be sorted by decreasing `life_expect`.
+ea_na_75_85<-longevity%>%filter(region=="East Asia & Pacific"|region=="North America")%>%filter(life_expect<=85&life_expect>=75)%>%arrange(desc(life_expect))
+
+#    To do this, you can use:
+#    (1) `filter()` to select rows with `region` as `"East Asia & Pacific"` or
+#    `"North America"` and `life_expect` between 75 and 85.
+#    (2) `arrange()` to arrange data by descending order of `life_expect`.
+#    To check your solution, `ea_na_75_85` prints to:
+#    # A tibble: 15 x 5
+#       country              gdp_percap life_expect population region
+#       <chr>                     <dbl>       <dbl>      <int> <chr>
+#     1 Hong Kong SAR, China     58618.        84.2    7336600 East Asia & Pacific
+#     2 Japan                    42281.        84.0  126994511 East Asia & Pacific
+#     3 Macao SAR, China        105420.        83.8     612167 East Asia & Pacific
+#     4 Singapore                87833.        82.8    5607283 East Asia & Pacific
+#     5 Australia                46012.        82.5   24210809 East Asia & Pacific
+#     6 Canada                   44819.        82.3   36264604 North America
+#     7 Korea, Rep.              36532.        82.0   51245707 East Asia & Pacific
+#     8 New Zealand              38565.        81.6    4693200 East Asia & Pacific
+#     9 United States            57638.        78.7  323127513 North America
+#    10 Brunei Darussalam        77421.        77.2     423196 East Asia & Pacific
+#    11 Vietnam                   6296.        76.3   94569072 East Asia & Pacific
+#    12 China                    15529.        76.3 1378665000 East Asia & Pacific
+#    13 Thailand                 16913.        75.3   68863514 East Asia & Pacific
+#    14 Malaysia                 27683.        75.3   31187265 East Asia & Pacific
+#    15 Samoa                     6378.        75.0     195125 East Asia & Pacific
+## Do not modify this line!
+
+
+
+# 4. From `longevity` in Q2, extract a tibble `top_10_perc_us` of dimension
+#    19 x 6 that contains the `country`, `gdp_percap`, `life_expect`, `population`,
+#    `region` and `perc_rank` columns.
+
+#    `perc_rank` should be a new column calculating the percentile rank for
+#    `life_expect` (hint: use `percent_rank()`). The dataset should be sorted
+#    by decreasing `perc_rank` and filtered for countries with top 10%
+#    `perc_rank` (i.e., `perc_rank` >= 0.9), plus `"United States"` (whose rank
+#    may lie outside the top 10%).
+
+top_10_perc_us<-longevity%>%mutate('perc_rank'=percent_rank(life_expect))%>%arrange(desc(perc_rank))%>%filter(perc_rank>=.9|country=="United States")
+
+#    To do this, you can use:
+#    (1) `mutate()` to create a new column `perc_rank`.
+#    (2) `arrange()` to sort the result by `perc_rank` descendingly.
+#    (3) `filter()` to find the countries with the top 10% `perc_rank` plus
+#    `"United States"`.
+#    To check your solution, `top_10_perc_us` prints to:
+#    # A tibble: 19 x 6
+#       country             gdp_percap life_expect population region                  perc_rank
+#       <chr>                    <dbl>       <dbl>      <int> <chr>                       <dbl>
+#     1 Hong Kong SAR, Chi…     58618.        84.2    7336600 East Asia & Pacific         1.
+#     2 Japan                   42281.        84.0  126994511 East Asia & Pacific         0.994
+#     3 Macao SAR, China       105420.        83.8     612167 East Asia & Pacific         0.989
+#     4 Switzerland             63889.        82.9    8372413 Europe & Central Asia       0.983
+#     5 Spain                   36305.        82.8   46484533 Europe & Central Asia       0.977
+#     6 Singapore               87833.        82.8    5607283 East Asia & Pacific         0.971
+#     7 Italy                   38380.        82.5   60627498 Europe & Central Asia       0.966
+#     8 Norway                  58790.        82.5    5236151 Europe & Central Asia       0.960
+#     9 Australia               46012.        82.5   24210809 East Asia & Pacific         0.954
+#    10 Iceland                 50746.        82.5     335439 Europe & Central Asia       0.948
+#    11 Israel                  37258.        82.4    8546000 Middle East & North Af…     0.943
+#    12 Canada                  44819.        82.3   36264604 North America               0.937
+#    13 Luxembourg             102389.        82.3     582014 Europe & Central Asia       0.931
+#    14 France                  41343.        82.3   66892205 Europe & Central Asia       0.925
+#    15 Sweden                  48905.        82.2    9923085 Europe & Central Asia       0.920
+#    16 Korea, Rep.             36532.        82.0   51245707 East Asia & Pacific         0.914
+#    17 Malta                   37928.        81.8     437418 Middle East & North Af…     0.908
+#    18 Finland                 43378.        81.8    5495303 Europe & Central Asia       0.902
+#    19 United States           57638.        78.7  323127513 North America               0.805
+## Do not modify this line!
+
+
+
+# 5. From `nations` in Q1, extract a tibble `gdp_by_region` of dimension 189 x 3
+#    that contains the `region`, `year` and `total_gdp` columns.
+#    `total_gdp` should be a new column calculating the total real GDP by
+#    `region` and `year`, where real GDP is the product of `gdp_percap` and
+#    `population`. The unit of `total_gdp` should be trillions of dollars (hint:
+#    divide the result by 1000000000000).
+
+gdp_by_region <- nations %>%mutate('gdp')%>%group_by(region,year)%>%summarise(total_gdp=sum(gdp_percap*population/1000000000000,na.rm=TRUE))
+
+#    To do this, you can use:
+#    (1) `mutate()` to create a new column `gdp` to find the real GDP.
+#    (2) `group_by()` to group data by `region` and `year`.
+#    (3) `summarise()` to find the total real GDP in trillions of dollars
+#    (hint: set `na.rm = TRUE` when taking sum since we may have NA's for `gdp`).
+#    To check your solution, `gdp_by_region` prints to:
+#    # A tibble: 189 x 3
+#    # Groups:   region [7]
+#       region               year total_gdp
+#       <chr>               <int>     <dbl>
+#     1 East Asia & Pacific  1990      5.59
+#     2 East Asia & Pacific  1991      6.10
+#     3 East Asia & Pacific  1992      6.57
+#     4 East Asia & Pacific  1993      7.11
+#     5 East Asia & Pacific  1994      7.71
+#     6 East Asia & Pacific  1995      8.39
+#     7 East Asia & Pacific  1996      9.09
+#     8 East Asia & Pacific  1997      9.66
+#     9 East Asia & Pacific  1998      9.75
+#    10 East Asia & Pacific  1999     10.3
+#    # … with 179 more rows
+## Do not modify this line!
+
+
+
+# 6. From `nations` in Q1, extract a tibble `p_countries` of dimension 5 x 2
+#    that contains `income` and `p` columns.
+#    The dataset should be filtered for `year` `2016`. `p` should be a new column
+#    calculating the proportions of countries with `life_expect` over 70 by
+#    `income` (hint: count for countries that satisfy the condition, then divide
+#    by the total count using `n()`).
+p_countries <- nations%>%filter(year==2016)%>%group_by(income)%>%select(life_expect,income)%>%summarise(p=sum(life_expect>70,na.rm = TRUE)/n())
+
+#%>%summarise(p=count(life_expect,na.rm = TRUE))
+
+#    To do this, you can use:
+#    (1) `filter()` filter select rows for `year` `2016`.
+#    (2) `group_by()` to group data by `income`.
+#    (3) `summarise()` to find the proportions of countries with `life_expect`
+#    over 70 (hint: set `na.rm = TRUE` when taking sum since we may have NA's).
+#    To check your solution, `p_countries` prints to:
+#    # A tibble: 5 x 2
+#      income                  p
+#      <chr>               <dbl>
+#    1 High income         0.841
+#    2 Low income          0.118
+#    3 Lower middle income 0.426
+#    4 Not classified      0
+#    5 Upper middle income 0.849
+## Do not modify this line!
+
+```
+
+part4
+
+```{r}
+# HW5: tidyr2
+#'
+#    In this exercise, you will familiarize yourself with the procedure of
+#    tidying up data.
+#    Throughout the exercise, use `%>%` to structure your operations.
+#    Do NOT use `for`, `while` or `repeat` loops.
+#'
+# 1. Load the package `readr` and use its function `read_csv()` to read the
+#    dataset `activities.csv` (located in directory `data/`). Store the
+#    corresponding dataframe into a tibble `activities`.
+#    In this dataset, each record is an observation (keyed by `id` and `trt`,
+#    i.e., treatment group) whose score has been recorded at two times (`T1` and
+#    `T2`) for three actions (`work`, `play` and `talk`).
+## Do not modify this line!
+library(readr)
+activities<-(read_csv("data/activities.csv"))
+
+library(readr)
+
+activities <- read_csv("data/activities.csv")
+
+
+# 2. Recall the three rules for a tidy dataset. What is the issue here?
+#    We have variables stored in multiple columns!
+#    Load the packages `tidyr` and `dplyr`.
+#    From the `activities` tibble, extract a tibble `act_gathered` of
+#    dimension 60 x 4 that contains the `id`, `trt`, `var` and `score` columns.
+#    `var` is a new column that collects the six columns for `work`, `play` and
+#    `talk`, while `score` is the corresponding score. The dataset should be
+#    sorted by increasing `id` and `trt`.
+library(tidyr)
+library(dplyr)
+act_gathered<-activities%>%gather(work.T1,play.T1,talk.T1,play.T2,work.T2,talk.T2,key='var',value='score')%>%arrange(id,trt)
+##use pivot_longer
+act_gathered2<-activities%>%pivot_longer(cols=c('work.T1','play.T1','talk.T1','play.T2','work.T2','talk.T2'),names_to = 'var',values_to = 'score')%>%arrange(id,trt)
+
+#    To do this, you can use:
+#    (1) `gather()` to collect the six columns for `var`.
+#    (2) `arrange()` to sort the result by ascending order of `id` and `trt`.
+#    Alternatively, you can use `pivot_longer()`.
+#    To check your solution, `act_gathered` prints to:
+#    # A tibble: 60 x 4
+#          id trt   var      score
+#       <int> <chr> <chr>    <dbl>
+#     1     1 cnt   work.T1 0.652
+#     2     1 cnt   play.T1 0.865
+#     3     1 cnt   talk.T1 0.536
+#     4     1 cnt   work.T2 0.275
+#     5     1 cnt   play.T2 0.354
+#     6     1 cnt   talk.T2 0.0319
+#     7     2 cnt   work.T1 0.568
+#     8     2 cnt   play.T1 0.615
+#     9     2 cnt   talk.T1 0.0931
+#    10     2 cnt   work.T2 0.229
+#    # … with 50 more rows
+## Do not modify this line!
+
+
+
+# 3. What is the issue now? Two variables are stored in a single column!
+#    From `act_gathered`, extract a tibble `act_separated` of dimension 60 x 5
+#    that contains the `id`, `trt`, `action`, `time` and `score` columns.
+#    `action` and `time` are two new columns that are separated from
+#    `act_gathered$var`.
+
+act_separated<-act_gathered%>%separate(var,into=c('action','time'))
+
+
+#    To do this, you can use `separate()` to separate `var` in `act_gathered`.
+#    To check your solution, `act_separated` prints to:
+#    # A tibble: 60 x 5
+#          id trt   action time   score
+#       <int> <chr> <chr>  <chr>  <dbl>
+#     1     1 cnt   work   T1    0.652
+#     2     1 cnt   play   T1    0.865
+#     3     1 cnt   talk   T1    0.536
+#     4     1 cnt   work   T2    0.275
+#     5     1 cnt   play   T2    0.354
+#     6     1 cnt   talk   T2    0.0319
+#     7     2 cnt   work   T1    0.568
+#     8     2 cnt   play   T1    0.615
+#     9     2 cnt   talk   T1    0.0931
+#    10     2 cnt   work   T2    0.229
+#    # … with 50 more rows
+## Do not modify this line!
+
+
+
+# 4. Is this dataset finally tidy? Not quite, we still have observations
+#    stored in multiple rows.
+#    From `act_separated`, extract a tibble `act_spread` of dimension 20 x 6
+#    that contains the `id`, `trt`, `time`, `play`, `talk` and `work` columns.
+#    `play`, `talk` and `work` are three new columns that are spread from
+#    `act_separated$action`.
+act_spread<-act_separated%>%spread(key=action,value = score)
+act_spread2<-act_separated%>%pivot_wider(names_from = action,values_from = score)
+
+#    To do this, you can use `spread()` to spread `action` in `act_separated`.
+#    Alternatively, you can use `pivot_wider()`.
+#    To check your solution, `act_spread` (using `spread()`) prints to:
+#    # A tibble: 20 x 6
+
+
+
+# 5. There is one missing value in `act_spread`. Use the function `is.na` and
+#    `which()` to locate the column index of the missing value
+#    (hint: `arr.ind = TRUE` might be useful). Store the result
+#    into a new variable `col_ix`, which should just be an integer.
+## Do not modify this line!
+
+col_ix1<-act_spread%>%is.na()%>%which(arr.ind = TRUE)
+col_ix=as.integer(col_ix1[,2])
+
+# 6. Use the function `fill()` to backward fill the missing value in `act_spread`
+#    (hint: in the `up` direction). Use the `col_ix` you find in question 5.
+#    Store the result into a tibble `act_filled`.
+#    To check your solution, `sum(act_filled[, col_ix])` returns 7.224964.
+## Do not modify this line!
+act_filled<-act_spread%>%fill(col_ix,.direction="up")
+sum(act_filled[,col_ix])
+
+
+
+```
+
+
+```{r}
+# HW5: Dplyr
+#'
+# You are not allowed to use any `for`, `while` or `repeat` in this exercise.
+#'
+# 1. Load the `tidyr` and `dplyr` packages.
+#    Load the `airquality` data set and save it into tibble `airquality`.
+
+library(tidyr)
+library(dplyr)
+data(airquality)
+airquality<-as_tibble(airquality)
+airquality%>%head(5)
+
+#    To do that, you can use `as_tibble` to transform the data frame into tibble.
+#    The first 5 lines of `airquality` should look like:
+#    # A tibble: 153 x 6
+#      Ozone Solar.R  Wind  Temp Month   Day
+#      <int>   <int> <dbl> <int> <int> <int>
+#    1    41     190   7.4    67     5     1
+#    2    36     118   8      72     5     2
+#    3    12     149  12.6    74     5     3
+#    4    18     313  11.5    62     5     4
+#    5    NA      NA  14.3    56     5     5
+## Do not modify this line!
+
+
+
+# 2. Replace the NA values in `Ozone` column from `airquality` by the mean of the
+#    non NA values and save the result into tibble `airquality_replace_na`.
+airquality_replace_na<-airquality%>%replace_na(list(Ozone=mean(airquality$Ozone,na.rm = TRUE)))
+
+mean(airquality$Ozone,na.rm = TRUE)
+
+#    To do that, you can use:
+#      - `replace_na` to replace the NA values with `mean` to compute the mean
+#      for the non NA values.
+#    The first 5 lines of `airquality_replace_na` should look like:
+#    # A tibble: 153 x 6
+#      Ozone Solar.R  Wind  Temp Month   Day
+#      <int>   <int> <dbl> <int> <int> <int>
+#    1    41     190   7.4    67     5     1
+#    2    36     118   8      72     5     2
+#    3    12     149  12.6    74     5     3
+#    4    18     313  11.5    62     5     4
+#    5    42.1    NA  14.3    56     5     5
+## Do not modify this line!
+
+
+
+# 3. Remove the rows that contain NA value in `Solar.R` column from `airquality_replace_na`.
+#    Save the result into `airquality_remove_na`.
+#    To do that, you can use `drop_na`.
+airquality_remove_na<-airquality_replace_na%>%drop_na(Solar.R)
+
+
+#    The first lines of `airquality_remove_na` should look like:
+#    # A tibble: 146 x 6
+#      Ozone Solar.R  Wind  Temp Month   Day
+#      <dbl>   <int> <dbl> <int> <int> <int>
+#    1    41     190   7.4    67     5     1
+#    2    36     118   8      72     5     2
+#    3    12     149  12.6    74     5     3
+#    4    18     313  11.5    62     5     4
+#    5    23     299   8.6    65     5     7
+## Do not modify this line!
+
+
+
+# 4. Select the columns `Wind`, `Temp`, `Month`, and `Day` from `airquality_remove_na`.
+#    Save the selected data into `airquality_selected`.
+#    To do that, you can use `select`.
+
+airquality_selected<-airquality_remove_na%>%select(Wind,Temp,Month,Day)
+#    The first lines of `airquality_selected` should look like:
+#    # A tibble: 146 x 4
+#        Wind  Temp Month   Day
+#       <dbl> <int> <int> <int>
+#    1   7.4    67     5     1
+#    2   8      72     5     2
+#    3  12.6    74     5     3
+## Do not modify this line!
+
+
+
+# 5. Select rows that have values larger than 6 in `Month` column from `airquality_selected`.
+#    Save the selected data into `airquality_filtered`.
+airquality_filtered<-airquality_selected%>%filter(Month>6)
+#    To do that, you can use `filter`.
+#    The first lines of `airquality_filtered` should look like:
+#    # A tibble: 89 x 4
+#        Wind  Temp Month   Day
+#       <dbl> <int> <int> <int>
+#    1   4.1    84     7     1
+#    2   9.2    85     7     2
+#    3   9.2    81     7     3
+## Do not modify this line!
+
+
+
+# 6. Modify `Wind` column from `airquality_filtered` so that
+#    when the value is in `[1,9)`, the new value is `7.4`;
+#    when the value is in `[9,20]`, the new value is `11.5`;
+#    otherwise replace the value by `21`.
+#    Save the result into `airquality_wind`.
+
+airquality_wind<-airquality_filtered%>%mutate('Wind'=case_when(Wind<9&Wind>=1 ~ 7.4,Wind<=20&Wind>=9 ~ 11.5,TRUE ~ 21))
+
+#    To do that, you can combine:
+#      - `mutate` to modify the `Wind` column,
+#      - with `case_when` as a general vectorised if.
+#    The first lines of `airquality_wind` should look like:
+#    # A tibble: 89 x 4
+#        Wind  Temp Month   Day
+#       <dbl> <int> <int> <int>
+#    1   7.4    84     7     1
+#    2  11.5    85     7     2
+#    3  11.5    81     7     3
+## Do not modify this line!
+
+
+
+# 7. Modify the `Temp` column from `airquality_wind` so that
+#    the temperature is in Celsius instead of Fahrenheit.
+#    Save the result into `airquality_temp`.
+airquality_temp<-airquality_wind%>%mutate(Temp=(Temp - 32) * 5 / 9)
+ss
+#    Note: The formula is (x - 32) * 5 / 9.
+#    To do that, you can use `mutate`.
+#    The first lines of `airquality_temp` should look like:
+#    # A tibble: 89 x 4
+#        Wind  Temp Month   Day
+#       <dbl> <dbl> <int> <int>
+#    1   7.4  28.9     7     1
+#    2  11.5  29.4     7     2
+#    3  11.5  27.2     7     3
+## Do not modify this line!
+
+
+
+# 8. Compute the mean temperature for each month from `airquality_temp`.
+#    Save the result into `airquality_mean_temp`.
+#    The new column name should be `mean_temp`.
+airquality_mean_temp<-airquality_temp%>%group_by(Month)%>%summarise(mean_temp=mean(Temp))
+
+#    To do that, you can use:
+#     - `group_by` to group by `month`,
+#     - `summarize` and `mean` to compute mean values.
+#    The first lines of `airquality_mean_temp` should look like:
+#    # A tibble: 3 x 2
+#        Month mean_temp
+#        <int>     <dbl>
+#    1     7      28.8
+#    2     8      28.8
+#    3     9      24.9
+## Do not modify this line!
+
+
+
+
+
+```
+
+
+part 6
+```{r}
+# HW5: Tidying Data
+#'
+# 1. Load the `tidyr`, `readr` and `dplyr` package and use its function `read_csv()`
+#    to read the dataset `warpbreaks.csv` (located in directory `data/`).
+#    Store the corresponding dataframe into a variable `warpbreaks`.
+#    For the following exercises, use the pipe operator `%>%` as much as you can.
+## Do not modify this line!
+library(tidyr)
+library(readr)
+library(dplyr)
+warpbreaks<-"data/warpbreaks.csv"%>%read_csv()
+
+
+# 2. Now let's clean the data, we can see a lot of missing values or values which don't make any sense
+#    in all of the three columns.
+#    Filter out all the `NA` values, as well as the values in `wool` column which does not have
+#    values in `A` or `B`, the values in `tension` column which does not have
+#    values in `L` or `M` or `H` and the rows which has negative or extreme values(>100) in `breaks` column.
+#    Then change the columns order into `wool`, `tension`, `breaks`.
+warpbreaks<-warpbreaks%>%filter_all(~!is.na(.x))%>%filter(wool=="A"|wool=="B")%>%
+  filter(tension=="L"|tension=="M"|tension=="H")%>%filter(breaks>=0|breaks<=100)%>%
+  select(wool,tension,breaks)
+
+#    To complete this, you can use:
+#      - `filter_all` to filter out all the `NA` values.
+#      - `filter` and `startsWith`.
+#      - `select` to change the columns order into `wool`, `tension`, `breaks`.
+#    Save your answer into a tibble `t1` which has 49 rows and 3 columns.
+#    To check your solution, it should print to:
+#    # A tibble: 49 x 3
+#     wool  tension breaks
+#     <chr> <chr>    <dbl>
+#    1 A     L           26
+#    2 A     L           30
+#    3 A     L           25
+#    4 A     L           70
+#    5 A     L           52
+#    6 A     L           51
+#    7 A     L           26
+#    8 A     L           67
+#    9 A     M           18
+#    10 A     M           29
+#    # ... with 39 more rows
+## Do not modify this line!
+
+
+
+# 3. Use `count` to count the number of rows for each combination of (`wool`,`tension`).
+#    Save the result dataframe into `t2` which should include 6 rows and 3 columns: `wool`, `tension` and `n`
+t2<-warpbreaks%>%count_(vars=c('wool','tension'))
+
+
+count_()#    To check your solution, it should print to:
+#    # A tibble: 6 x 3
+#     wool  tension     n
+#     <chr> <chr>   <int>
+#    1 A     H           8
+#    2 A     L           8
+#    3 A     M           8
+#    # ... with 3 more rows
+## Do not modify this line!
+
+
+
+# 4. Use `pivot_wider` to `t1` to tranform the column `tension` into multiple columns `L`, `M` and `H`,
+#    fill in the values with the sum of `breaks` for each combination of (`wool`,`tension`).
+#    Hint: you can use the argument `values_fn = list(breaks = sum)`.
+#    Save the result dataframe into `t3`.
+#    Your result should look like this:
+#    # A tibble: 2 x 4
+#     wool      L     M     H
+#     <chr> <dbl> <dbl> <dbl>
+#    1 A       347   195   197
+#    # ... with 1 more rows
+## Do not modify this line!
+
+
+
+# 5. Use `pivot_longer` to transfomr your `t3` into a tibble of 6 rows with columns `wool`, `tension`
+#    and `sum_of_breaks`. Save your result into `t4` which includes 6 rows and 3 columns.
+#    To check your solution, it should print to:
+#    # A tibble: 6 x 3
+#     wool  tension sum_of_breaks
+#     <chr> <chr>           <dbl>
+#    1 A     L                 347
+#    2 A     M                 195
+#    3 A     H                 197
+#    # ... with 3 more rows
+## Do not modify this line!
+
+
+
+
+
+```
+part7
+```{r}
+# HW5: Data manipulation
+#'
+# 1. Load the `tidyr` and `dplyr` package and use `data` to read in the `billboard` data which describes
+#    Song rankings for billboard top 100 in the year 2000.
+#    Now let's start analyze the dataset!
+#    For the following exercises, use the pipe operator `%>%` as much as you can.
+## Do not modify this line!
+library(tidyr)
+library(dplyr)
+data(billboard)
+
+
+# 2. Let's take a look at the `billboard` data, we notice that there're 79 columns in total
+#    and 76 columns to represent the rankings of each week.
+#    Put the week name into one column called `week` and store the ranking
+#    into another column called `rank`, keep the first three column names, save the new tibble
+#    dataframe into `t1`, which will have 24,092 rows and 5 columns.
+
+billboard
+t1<-billboard%>%pivot_longer(cols=starts_with("wk"),names_to = "week",values_to = "rank")
+
+#    Hint: you can use `pivot_longer` and `starts_with`.
+#    To check your solution, it should print to:
+#    # A tibble: 24,092 x 5
+#      artist track                   date.entered week   rank
+#      <chr>  <chr>                   <date>       <chr> <dbl>
+#    1 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk1      87
+#    2 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk2      82
+#    3 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk3      72
+#    4 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk4      77
+#    5 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk5      87
+#    6 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk6      94
+#    7 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk7      99
+#    8 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk8      NA
+#    9 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk9      NA
+#    10 2 Pac  Baby Don't Cry (Keep... 2000-02-26   wk10     NA
+#    # ... with 24,082 more rows
+## Do not modify this line!
+
+
+
+# 3. We can notice that in `t1`,
+#    1. The rank includes a lot of `NA` values,
+#    2. The `wk` in front of each `week` is redundant.
+#    So now do the same thing as the previous question, but this time drop the `NA` values and
+#    change `wk<number>` to `<number>` for the `week` column as well.
+#    Hint: to do so, you can start from `billboard` dataset and use `pivot_longer` along with the
+#    `names_prefix` and `values_drop_na` arguments.
+#    Save your result into `t2`.
+t2<-billboard%>%pivot_longer(cols = starts_with("wk"),names_to = "week",names_prefix = "wk",values_to="rank", values_drop_na = TRUE)
+
+#    Your new `t2` should have 5307 rows and 5 columns.
+#    To check your solution, it should print to:
+#    # A tibble: 5,307 x 5
+#       artist  track                   date.entered week   rank
+#       <chr>   <chr>                   <date>       <chr> <dbl>
+#    1 2 Pac   Baby Don't Cry (Keep... 2000-02-26   1        87
+#    2 2 Pac   Baby Don't Cry (Keep... 2000-02-26   2        82
+#    3 2 Pac   Baby Don't Cry (Keep... 2000-02-26   3        72
+#    4 2 Pac   Baby Don't Cry (Keep... 2000-02-26   4        77
+#    5 2 Pac   Baby Don't Cry (Keep... 2000-02-26   5        87
+#    6 2 Pac   Baby Don't Cry (Keep... 2000-02-26   6        94
+#    7 2 Pac   Baby Don't Cry (Keep... 2000-02-26   7        99
+#    8 2Ge+her The Hardest Part Of ... 2000-09-02   1        91
+#    9 2Ge+her The Hardest Part Of ... 2000-09-02   2        87
+#    10 2Ge+her The Hardest Part Of ... 2000-09-02   3        92
+#    # ... with 5,297 more rows
+## Do not modify this line!
+
+
+
+# 4. Now we want to check the highest rank increase within one week.
+#    For example for the first track `Baby Don't Cry (Keep...`, its weekly ranking is
+#    87, 82, 72, 77, 87, 94, 99, so the highest rank increase will be 82-72=10 from week2 to week3.
+#    For each track, compute its highest rank increase, save the answer in the column `highest_rank_increase`.
+
+t2_rank<-t2%>%mutate("rank_increase"=-rank+lag(rank))%>%filter(week!=1)%>%group_by(artist,track,date.entered)%>%summarise("highest_rank_increase"=max(rank_increase,na.rm=TRUE))
+
+
+#    To do that, you can use:
+#    - `mutate` and `lag` to calculate the rank difference.
+#    - `filter` to filter out the information for week 1
+#    (because week 1 is the first week for which the song has a rank thus there is no rank increase).
+#    - `summarize`and `group_by` to find out the maximum of rank difference.
+#    Save your answer into `t2_rank`, which should include 313 rows and 4 columns:
+#    `artist`, `track`, `date.entered` and `highest_rank_increase`.
+#    To check your solution, it should print to:
+#    # A tibble: 313 x 4
+#    # Groups:   artist, track [313]
+#    artist         track                   date.entered highest_rank_increase
+#    <chr>          <chr>                   <date>                       <dbl>
+#    1 2 Pac          Baby Don't Cry (Keep... 2000-02-26                      10
+#    2 2Ge+her        The Hardest Part Of ... 2000-09-02                       4
+#    3 3 Doors Down   Kryptonite              2000-04-08                      11
+#    4 3 Doors Down   Loser                   2000-10-21                      10
+#    5 504 Boyz       Wobble Wobble           2000-04-15                      23
+#    6 98^0           Give Me Just One Nig... 2000-08-19                      17
+#    7 A*Teens        Dancing Queen           2000-07-08                       1
+#    8 Aaliyah        I Don't Wanna           2000-01-29                      22
+#    9 Aaliyah        Try Again               2000-03-18                      15
+#    10 Adams, Yolanda Open My Heart           2000-08-26                       8
+#    ... with 303 more rows
+## Do not modify this line!
+
+
+
+# 5. We want to have `year`, `month` and `date` information seperately.
+#    We can use `seperate` function to seperate  `2000-02-26` of `date.entered` into `year` :`2000`,
+#    `month`: `02`, and `date`: `26`.
+#    Save your result into `t3`.
+t3<-t2%>%separate(date.entered,into=c('year','month','date'))
+
+#    Your new dataframe should not have `data.entered` column and should have 5307 rows and seven columns in total:
+#    `artist`, `track`, `year`, `month`, `date`, `week` and `rank`.
+#    To check your solution, it should print to:
+#    # A tibble: 5,307 x 7
+#       artist  track                   year  month date  week   rank
+#       <chr>   <chr>                   <chr> <chr> <chr> <chr> <dbl>
+#    1 2 Pac   Baby Don't Cry (Keep... 2000  02    26    1        87
+#    2 2 Pac   Baby Don't Cry (Keep... 2000  02    26    2        82
+#    3 2 Pac   Baby Don't Cry (Keep... 2000  02    26    3        72
+#    4 2 Pac   Baby Don't Cry (Keep... 2000  02    26    4        77
+#    5 2 Pac   Baby Don't Cry (Keep... 2000  02    26    5        87
+#    6 2 Pac   Baby Don't Cry (Keep... 2000  02    26    6        94
+#    7 2 Pac   Baby Don't Cry (Keep... 2000  02    26    7        99
+#    8 2Ge+her The Hardest Part Of ... 2000  09    02    1        91
+#    9 2Ge+her The Hardest Part Of ... 2000  09    02    2        87
+#    10 2Ge+her The Hardest Part Of ... 2000  09    02    3        92
+#    # ... with 5,297 more rows
+## Do not modify this line!
+
+
+
+# 6. Use `group_by` to group `t3` by `artist`, `track` and `month`.
+#    Use `summarize` to add another column called `highest_rank`,
+#    which represent the highest rank in year 2000 for each song.
+#    Save your result into `t4` which will have 317 rows and 4 columns.
+
+t4<-t3%>%group_by(artist,track,month)%>%summarize(highest_rank=min(rank))
+
+#    To check your solution, it should print to:
+#    # A tibble: 317 x 4
+#    # Groups:   artist, track [317]
+#     artist         track                   month highest_rank
+#     <chr>          <chr>                   <chr>        <dbl>
+#    1 2 Pac          Baby Don't Cry (Keep... 02              72
+#    2 2Ge+her        The Hardest Part Of ... 09              87
+#    3 3 Doors Down   Kryptonite              04               3
+#    4 3 Doors Down   Loser                   10              55
+#    5 504 Boyz       Wobble Wobble           04              17
+#    6 98^0           Give Me Just One Nig... 08               2
+#    7 A*Teens        Dancing Queen           07              95
+#    8 Aaliyah        I Don't Wanna           01              35
+#    9 Aaliyah        Try Again               03               1
+#    10 Adams, Yolanda Open My Heart           08              57
+#    # ... with 307 more rows
+## Do not modify this line!
+
+
+
+# 7. Let's go back to the original `billborad`, we want to analyze the highest ranks of the songs
+#    in their first week of realse.
+#    Fisrt use `filter` to filter out the `NA` values in `wk1` if there's any.
+#    Then use `arrange` to output the songs in the ranking order for `wk1` (increasing order of rank).
+#    Finally use `select` to include only the columns we're interested in:
+#    `artist`, `track`, `date.entered` and `wk1_rank`
+#    Save your result into `t5`, which has 317 rows and 4 columns.
+t5<-billboard%>%filter(!is.na(wk1))%>%arrange(wk1)%>%select(artist,track,date.entered,wk1_rank=wk1)
+
+#    To check your solution, it should print to:
+#    # A tibble: 317 x 4
+#       artist                           track             date.entered wk1_rank
+#       <chr>                            <chr>             <date>          <dbl>
+#    1 Santana                          Maria, Maria      2000-02-12         15
+#    2 Hanson                           This Time Around  2000-04-22         22
+#    3 Pink                             There U Go        2000-03-04         25
+#    4 Carey, Mariah                    Crybaby           2000-06-24         28
+#    5 "Elliott, Missy \"Misdemeanor\"" Hot Boyz          1999-11-27         36
+#    6 Martin, Ricky                    She Bangs         2000-10-07         38
+#    7 Backstreet Boys, The             Shape Of My Heart 2000-10-14         39
+#    8 Dixie Chicks, The                Goodbye Earl      2000-03-18         40
+#    9 Madonna                          Music             2000-08-12         41
+#    10 N'Sync                           Bye Bye Bye       2000-01-29         42
+#    # ... with 307 more rows
+## Do not modify this line!
+
+
+
+# 8. Now let's only focusing on the songs released in 2000, use your result in question 2 `t1`.
+#    Use `filter` and `startsWith` to filter out the songs released in 1999.
+#    Then use `group_by` and `summarize` to calculate the average of ranks of songs for each artist.
+#    Your answer should include 2 columns :`artist` and `avg_rank` and 204 rows.
+#    Save your reult into `t6`.
+
+t6<-t1%>%filter(!startsWith(as.character(date.entered),"1999"))%>%group_by(artist)%>%summarise(avg_rank=mean(rank,na.rm = TRUE))
+
+
+
+
+#    To check your solution, it should print to:
+#    # A tibble: 204 x 2
+#       artist              avg_rank
+#       <chr>                  <dbl>
+#    1 2 Pac                   85.4
+#    2 2Ge+her                 90
+#    3 3 Doors Down            37.6
+#    4 504 Boyz                56.2
+#    5 98^0                    37.6
+#    6 A*Teens                 97
+#    7 Aaliyah                 30.3
+#    8 Adams, Yolanda          67.8
+#    9 Adkins, Trace           76.3
+#    10 Aguilera, Christina     22.1
+#    # ... with 194 more rows
+#'
+## Do not modify this line!
+
+```
+
+
+part 8
+```{r}
+# HW5: Data manipulation
+#'
+# In this exercise, we will learn how to manipulate data using the dataset `mobility.csv`.
+# You are not allowed to use any `for`, `while` or `repeat` in this exercise.
+#'
+# 1. Load the `tidyr`, `readr`, and `dplyr` packages.
+#    Read the Mobility dataset from path `data/mobility.csv` using `read_csv()`
+#    and save it into a tibble named `mobility`.
+
+
+#    To check your solution, `mobility` prints to:
+#    # A tibble: 729 x 6
+#    Name             Mobility State Commute Longitude Latitude
+#    <chr>               <dbl> <chr>   <dbl>     <dbl>    <dbl>
+#    1 Johnson City       0.0622 TN      0.325     -82.4     36.5
+#    2 Morristown         0.0537 TN      0.276     -83.4     36.1
+#    3 Middlesborough     0.0726 TN      0.359     -83.5     36.6
+#    4 Knoxville          0.0563 TN      0.269     -84.2     36.0
+#    5 Winston-Salem      0.0448 NC      0.292     -80.5     36.1
+#    6 Martinsville       0.0518 VA      0.313     -80.3     36.7
+#    7 Greensboro         0.0474 NC      0.305     -79.8     36.3
+#    8 North Wilkesboro   0.0517 NC      0.289     -81.3     36.3
+#    9 Galax              0.0796 VA      0.325     -81.0     36.6
+#    10 Spartanburg        0.0431 SC      0.299     -81.8     34.9
+#    # … with 719 more rows
+## Do not modify this line!
+library(tidyr)
+library(readr)
+library(dplyr)
+mobility<-read_csv("data/mobility.csv")
+
+
+# 2. Compute the number of appearance of state names from column `State`.
+#    Order the column in alphabetical order using `arrange`.
+#    Store the result into a tibble `count_by_state`.
+
+
+#    To do that, you can use:
+#      - `group_by` to group by state,
+#      - `count` to count values,
+#      - `arrange` to the order the result.
+#    To check your solution, `count_by_state` prints to:
+#    # A tibble: 51 x 2
+#    # Groups:   State [51]
+#    State     n
+#    <chr> <int>
+#    1 AK       13
+#    2 AL       14
+#    3 AR       18
+#    4 AZ        5
+#    5 CA       18
+#    6 CO       17
+#    7 CT        1
+#    8 DC        1
+#    9 DE        2
+#    10 FL       16
+#    # … with 41 more rows
+## Do not modify this line!
+count_by_state<-mobility%>%group_by(State)%>%count(State)%>%arrange(State)
+
+
+# 3. For each state, compute the column mean and standard deviation for column `Commute` and `Mobility`.
+#    Store the result in tibble `stats_by_state`, where the five columns are `State`, `Commute_mean`,
+#    `Mobility_mean`, `Commute_sd`, and `Mobility_sd`.
+
+
+#    To do that, you can use:
+#      - `group_by` to group by state,
+#      - `summarize_at` to get the statistics for the `Commute` and `Mobility` columns,
+#        along with `mean` to compute mean and `sd` to compute standard deviation.
+#    To check your solution, `stats_by_state` prints to:
+#    # A tibble: 51 x 5
+#      State Commute_mean Mobility_mean Commute_sd Mobility_sd
+#      <chr>        <dbl>         <dbl>      <dbl>       <dbl>
+#    1 AK           0.726        0.110      0.183      0.0396
+#    2 AL           0.328        0.0540     0.0514     0.0156
+#    3 AR           0.415        0.0724     0.0553     0.0236
+#    4 AZ           0.398        0.0758     0.125      0.0249
+#    5 CA           0.403        0.101      0.133      0.0162
+#    6 CO           0.516        0.127      0.130      0.0423
+#    7 CT           0.308        0.0786    NA         NA
+#    8 DC           0.16         0.110     NA         NA
+#    9 DE           0.304        0.0642     0.0757     0.00221
+#    10 FL           0.283        0.0581     0.0441     0.00734
+#    # … with 41 more rows
+## Do not modify this line!
+
+stats_by_state<-mobility%>%group_by(State)%>%
+  summarise(Commute_mean=mean(Commute),Mobility_mean=mean(Mobility),Commute_sd=sd(Commute), Mobility_sd=sd(Mobility))%>%
+  select(State,Commute_mean,Mobility_mean,Commute_sd,Mobility_sd)
+
+# 4. Transform the `stats_by_state` into long form
+#    which contains columns `State`, `Variable`, `Stat`, and `Value`.
+#    Store the result into tibble `stats_by_state_longer`.
+
+
+#    To do that, you can use:
+#      - `pivot_longer` to gather the column `Commute_mean`, `Mobility_mean`, `Commute_sd`, and `Mobility_sd`,
+#      - `separate` to separate the variable name column from the result of `pivot_longer`.
+#    To check your solution, `stats_by_state_longer` prints to:
+#    # A tibble: 204 x 4
+#      State Variable Stat   Value
+#      <chr> <chr>    <chr>  <dbl>
+#    1 AK    Commute  mean  0.726
+#    2 AK    Mobility mean  0.110
+#    3 AK    Commute  sd    0.183
+#    4 AK    Mobility sd    0.0396
+#    5 AL    Commute  mean  0.328
+#    6 AL    Mobility mean  0.0540
+#    7 AL    Commute  sd    0.0514
+#    8 AL    Mobility sd    0.0156
+#    9 AR    Commute  mean  0.415
+#    10 AR    Mobility mean  0.0724
+#    # … with 194 more rows
+## Do not modify this line!
+
+stats_by_state_longer<-stats_by_state%>%pivot_longer(cols=c(Commute_mean,Mobility_mean,Commute_sd,Mobility_sd),names_to = 'test',values_to = 'Value')%>%
+  separate(test,into=c('Variable','Stat'))
+
+# 5. Transform the `stats_by_state_longer` into a tibble `stats_by_state_ranked`
+#    which contains columns `State`, `Commute`, and `Mobility`.
+#    The column `Commute` contains the percentage rank of the mean of the `Commute` for each state,
+#    and the column `Mobility` contains the percentage rank of the mean of the `Mobility` for each state.
+#    Please order the result by descending `Commute`, and then descending `Mobility` to break ties
+#    if two `Commute` ranks are equal.
+
+
+
+
+#    To do that, you can use:
+#      - `filter` to select the rows that contain mean values,
+#      - `select` to remove the `Stat` column,
+#      - `group_by` to group by `Commute` and `Mobility`,
+#      - `mutate` and `percent_rank` to get the percentage rank,
+#      - `pivot_wider` to spread the result into wide form,
+#      - `arrange` to order the result.
+#      - `percent_rank`to get the percentage rank.
+#    To check your solution, `stats_by_state_ranked` prints to:
+#    # A tibble: 51 x 3
+#      State Commute Mobility
+#      <chr>   <dbl>    <dbl>
+#     1 AK       1.       0.66
+#     2 MT       0.98     0.92
+#     3 ND       0.96     1.
+#     4 SD       0.94     0.9
+#     5 WY       0.92     0.98
+#     6 KS       0.9      0.84
+#     7 NE       0.88     0.96
+#     8 UT       0.86     0.94
+#     9 NM       0.84     0.52
+#     10 IA       0.82     0.86
+#     # … with 41 more rows
+## Do not modify this line!
+stats_by_state_ranked<-stats_by_state_longer%>%filter(Stat=='mean')%>%select(-Stat)%>%group_by(Variable)%>%
+  #
+  pivot_wider(names_from = Variable,values_from =Value)%>%
+  mutate(Commute=percent_rank(Commute),Mobility=percent_rank(Mobility))%>%
+  #%>%
+  arrange(desc(Commute),desc(Mobility))
+
+
+# 6. Concatenate the mean `Latitude` and mean `Longitude` for each state by `_`
+#    and save the result into tibble `coordinates`. Before concatenating, round
+#    the mean `Latitude` to 3 digits and mean `Longitude` to 2 digits.
+
+
+#    To do that, you can use:
+#      - `group_by` to group by `State`,
+#      - `summarize` and `mean `to get mean values,
+#      - `round` to round the mean values,
+#      - `unite` to paste the columns together.
+#    To check your solution, `coordinates` prints to:
+#    # A tibble: 51 x 2
+#      State Coordinates
+#      <chr> <chr>
+#    1 AK    60.749_-150.9
+#    2 AL    32.911_-86.74
+#    3 AR    35.003_-92.3
+#    4 AZ    33.924_-110.66
+#    5 CA    37.696_-120.34
+#    6 CO    38.831_-105.47
+#    7 CT    41.628_-72.61
+#    8 DC    38.926_-77.43
+#    9 DE    39.055_-75.64
+#     10 FL    28.669_-82.47
+#    # … with 41 more rows
+## Do not modify this line!
+coordinates<-mobility%>%group_by(State)%>%summarise(Latitude=mean(Latitude)%>%round(3),Longitude=mean(Longitude)%>%round(2))%>%
+  unite(Coordinates,Latitude,Longitude)
+#%>%round(Latitude,3)%>%round(Longitude,2) 
+
+
+
+```
+
+part9 the data can not be downloaded
+```{r}
+
+```
+
+part 10
+```{r}
+# HW5: Data Manipulation and Tidying on the Iris dataset
+#
+#  Refrain from using any loops (`for`, `while`) and `repeat` for this exercise.
+#
+#  Also feel free to use `gather()` and `spread()` instead of `pivot_wider()`
+#  and `pivot_longer()` if you feel more comfortable with the former in the
+#  exercise.
+#
+#  1. Load the `dplyr` and `tibble` packages. Load the `iris` dataset in the
+#   namespace using `data(iris)` and transform it into a tibble of the same name
+#   using `as_tibble()`. Inspect the first rows of the tibble using `head()` to
+#   get an idea of the data at hand. Assign the result to the `head_iris` tibble.
+#   (dimensions should be: `iris (150x5)`, `head_iris (6x5)`)
+#   To check your solution, the first three lines of `head_iris` print to:
+#   # A tibble: 6 x 5
+#   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+#   <dbl>       <dbl>        <dbl>       <dbl> <fct>
+#    1          5.1         3.5          1.4         0.2 setosa
+#    2          4.9         3            1.4         0.2 setosa
+#    3          4.7         3.2          1.3         0.2 setosa
+## Do not modify this line!
+library(dplyr)
+library(tibble)
+data(iris)
+iris<-as_tibble(iris)
+head_iris<-head(iris)
+
+
+#  2. Use `summary()` to print statistical summaries for each of the variable
+#   in `iris`. Assign the result to variable `summary_iris`.
+#   We'll try to reproduce the content of this summary breaking it down in
+#   several steps.
+## Do not modify this line!
+summary_iris<-summary(iris)
+
+
+#  3. First, let's compute the column that contains the counts across the
+#   different species of iris.
+#   To do so, you can use `count()`.
+#   Assign the resulting tibble to variable `species_count`. It should contain
+#   two colums `Species` and `num`, representing each specie of iris and how many
+#   of each specie are found in the dataset.
+#   (dimensions should be: `species_count (3x2)`)
+#   To check your solution, the first line of `species_count` prints to:
+#   # A tibble: 3 x 2
+#   Species      num
+#   <fct>      <int>
+#    1 setosa        50
+#
+#   Now let's focus on the numerical variables.
+## Do not modify this line!
+
+species_count<-iris%>%count(Species,name='num')
+
+
+#  4. Before going forward, we will make sure the `select()` function that you
+#    might use in the next questions is the one we need : write
+#   `select <- dplyr::select` to make sure calling `select()` will call the
+#   `dyplr` function (the `MASS` package also has one and there might be some
+#   collusion based on your environment if this precaution is not taken). You can
+#   now use `select()` as in `df %>% select()` as you learned how to.
+#   You might not use `select` in the next questions, but if you do you'll now
+#   be sure it is the right function.
+## Do not modify this line!
+select <- dplyr::select
+
+
+#  5. Load the `stats` package. Select all columns except for `Species` (you
+#   might use `select()`) and piping the result, compute their min,
+#   first quantile, median, mean, third quantile and max.
+#   To do so, you can use:
+#   - `summarize_if` in conjunction with `is.numeric`,
+#   - and built-in `min`, `median`, `mean`, `max`,
+#   - as well as `stats::quantile` (be careful to transform it into a function
+#     of only one variable to use within `summarize_if`).
+#   Make sure you name your functions inside the `summarize_if` call. Their
+#   names should be `Min.`, `1st Qu.`, `Median`, `Mean`, `3rd Qu.` and `Max.`
+#   (similar to the names in `summary(iris)`, make sure you don't modify them!).
+#   Store the resulting tibble in the variable `summary_stats`.
+#   Its dimensions should be `(1x24)`. The names of its 24 columns should be
+#   `Sepal.Width_Min.`, `Sepal.Length_Min.`, `Sepal.Length_1st Qu.` etc..
+
+
+
+
+#   To check your solution, `summary_stats` prints to:
+#   # A tibble: 1 x 24
+#   Sepal.Length_Mi… Sepal.Width_Min. Petal.Length_Mi… Petal.Width_Min.
+#   <dbl>            <dbl>            <dbl>            <dbl>
+#     1              4.3                2                1              0.1
+#   # … with 20 more variables: `Sepal.Length_1st Qu.` <dbl>, `Sepal.Width_1st
+#   #   Qu.` <dbl>, `Petal.Length_1st Qu.` <dbl>, `Petal.Width_1st Qu.` <dbl>,
+#   #   Sepal.Length_Median <dbl>, Sepal.Width_Median <dbl>,
+#   #   Petal.Length_Median <dbl>, Petal.Width_Median <dbl>,
+#   #   Sepal.Length_Mean <dbl>, Sepal.Width_Mean <dbl>, Petal.Length_Mean <dbl>,
+#   #   Petal.Width_Mean <dbl>, `Sepal.Length_3rd Qu.` <dbl>, `Sepal.Width_3rd
+#   #   Qu.` <dbl>, `Petal.Length_3rd Qu.` <dbl>, `Petal.Width_3rd Qu.` <dbl>,
+#   #   Sepal.Length_Max. <dbl>, Sepal.Width_Max. <dbl>, Petal.Length_Max. <dbl>,
+#   #   Petal.Width_Max. <dbl>
+#
+#   Let's tidy this tibble to get a result that is easier to understand. We
+#   want to transform this one-row tibble into one where each row is a variable
+#   (one of `Petal.Length`, `Petal.Width`, `Sepal.Length` and `Sepal.Width`) and
+#   each column is a summary stat computed for each variable.
+## Do not modify this line!
+
+library(stats)
+summary_stats<-iris%>%select(-Species)%>%
+  summarise_if(is.numeric,list(Min.=min,"1st Qu."=~stats::quantile(.x,probs=0.25),Median=median,Mean=mean,"3rd Qu."=~stats::quantile(.x,probs=0.75),Max.=max))
+
+
+#  6. Load the `tidyr` package. First we will transform our one-row tibble into
+#   a tibble with three columns:
+#   - column `variable` containing the variable name (e.g. `Sepal.Length`)
+#   - column `stat` containing the summary statistic computed on the `variable`
+#   of the same row (e.g. `1st Qu.`)
+#   - column `value` containing the value of the `stat` (e.g. `5.1`)
+#   One possible way to do it is by piping your operations:
+#    - take in `summary_stats`,
+#    - use `pivot_longer()` to effectively transpose your data with one column
+#    (`key`) containing the old column names (e.g. `Petal.Length_Min.`) and the
+#    other column containing the corresponding values (`value`),
+#    - call `separate()` to break the `key` column into the two columns
+#    (`variable` and `stat`).
+#   Hint: use `everything()` in `pivot_longer()`.
+#   Assign the result to tibble `summary_long`.
+#   Feel free to use `gather()` and `spread()` instead of `pivot_longer()`,
+#   `everything()` and `separate()` if you feel more comfortable with the former.
+#   (dimensions should be `summary_long (24x3)`)
+
+
+#   To check your solution, `summary_long` prints to:
+#   # A tibble: 24 x 3
+#   variable     stat    value
+#   <chr>        <chr>   <dbl>
+#    1 Sepal.Length Min.      4.3
+#    2 Sepal.Width  Min.      2
+#    3 Petal.Length Min.      1
+#    4 Petal.Width  Min.      0.1
+#    5 Sepal.Length 1st Qu.   5.1
+#    6 Sepal.Width  1st Qu.   2.8
+#    7 Petal.Length 1st Qu.   1.6
+#    8 Petal.Width  1st Qu.   0.3
+#    9 Sepal.Length Median    5.8
+#   10 Sepal.Width  Median    3
+#   # … with 14 more rows
+## Do not modify this line!
+
+
+library(tidyr)
+summary_long<-summary_stats%>%pivot_longer(everything(),names_to = 'variable',values_to = 'value')%>%select(variable,value)%>%
+  separate(variable,into=c('variable','stat'),sep = '_')
+
+#  7. From `summary_long`, extract the stats as column names to obtain the tibble
+#   in which each row is a variable (one of `Petal.Length`, `Petal.Width`,
+#   `Sepal.Length` and `Sepal.Width`) and each column is a summary stat computed
+#   for each variable (`Min.`, `1st Qu.`, `Median`, `Mean`, `3rd Qu.` and `Max.`).
+#   One efficient way to do that is to use `pivot_wider()`.
+#   Assign the result to tibble `summary_stats_tidy`.
+#   (dimensions should be `summary_stats_tidy (4x7)`)
+
+
+  
+#   To check your solution, the first two lines of `summary_stats_tidy` print to:
+#   # A tibble: 4 x 7
+#   variable      Min. `1st Qu.` Median  Mean `3rd Qu.`  Max.
+#   <chr>        <dbl>     <dbl>  <dbl> <dbl>     <dbl> <dbl>
+#    1 Sepal.Length   4.3       5.1   5.8   5.84       6.4   7.9
+#    2 Sepal.Width    2         2.8   3     3.06       3.3   4.4
+## Do not modify this line!
+
+summary_stats_tidy<-summary_long%>%pivot_wider(names_from = 'stat',values_from = value)
+
+#  8. We are getting closer! We need to transpose our tibble to obtain one
+#   similar to that of `summary(iris)`.
+#   Transpose `summary_stats_tidy`, into a tibble `summary_stats_transposed`.
+#   It should have five columns: the first, named `Stat` containing the type
+#   of summary stat computed and the others containing each variable.
+
+
+
+#   You can pipe operations to transpose `summary_stats_tidy`:
+#   - first using `pivot_longer`
+#   - and chaining it with a `pivot_wider` call.
+#   Hint: you can use `pivot_longer(-variable, ...)` where `...` should be
+#   replaced with the appropriate arguments, to pivot all columns but the
+#   `variable` one.
+#   Feel free to use `gather()` and `spread()` instead of `pivot_longer()` and
+#   `pivot_wider()` if you are more comfortable.
+#   (dimensions should be `summary_stats_transposed (6x5)`)
+#   To check your solution, the first three lines of `summary_stats_transposed`
+#   print to:
+#   # A tibble: 6 x 5
+#   Stat    Sepal.Length Sepal.Width Petal.Length Petal.Width
+#   <chr>          <dbl>       <dbl>        <dbl>       <dbl>
+#    1 Min.            4.3         2            1           0.1
+#    2 1st Qu.         5.1         2.8          1.6         0.3
+#    3 Median          5.8         3            4.35        1.3
+## Do not modify this line!
+summary_stats_transposed<-summary_stats_tidy%>%pivot_longer(-variable,names_to = 'Stat',values_to = 'test')%>%
+  pivot_wider(names_from = variable, values_from = test)
+
+
+
+
+```
+
+part 11
+```{r}
+# HW5: more data manipulation
+#'
+# For this exercise, we will explore NYC airbnb dataset.
+#'
+# 1. Load the `data/Airbnb_NYC_2019.csv` dataset and assign it to a tibble `airbnb`.
+#    To check your result, `airbnb` prints to:
+#    # A tibble: 48,895 x 16
+#    id name  host_id host_name neighbourhood_g… neighbourhood latitude longitude room_type price
+#    <dbl> <chr>   <dbl> <chr>     <chr>            <chr>            <dbl>     <dbl> <chr>     <dbl>
+#   1  2539 Clea…    2787 John      Brooklyn         Kensington        40.6     -74.0 Private …   149
+#   2  2595 Skyl…    2845 Jennifer  Manhattan        Midtown           40.8     -74.0 Entire h…   225
+#   3  3647 THE …    4632 Elisabeth Manhattan        Harlem            40.8     -73.9 Private …   150
+#   4  3831 Cozy…    4869 LisaRoxa… Brooklyn         Clinton Hill      40.7     -74.0 Entire h…    89
+#   5  5022 Enti…    7192 Laura     Manhattan        East Harlem       40.8     -73.9 Entire h…    80
+#   6  5099 Larg…    7322 Chris     Manhattan        Murray Hill       40.7     -74.0 Entire h…   200
+#   7  5121 Blis…    7356 Garon     Brooklyn         Bedford-Stuy…     40.7     -74.0 Private …    60
+#   8  5178 Larg…    8967 Shunichi  Manhattan        Hell's Kitch…     40.8     -74.0 Private …    79
+#   9  5203 Cozy…    7490 MaryEllen Manhattan        Upper West S…     40.8     -74.0 Private …    79
+#   10  5238 Cute…    7549 Ben       Manhattan        Chinatown         40.7     -74.0 Entire h…   150
+#    # … with 48,885 more rows, and 6 more variables: minimum_nights <dbl>, number_of_reviews <dbl>,
+#   last_review <date>, reviews_per_month <dbl>, calculated_host_listings_count <dbl>,
+#   availability_365 <dbl>
+## Do not modify this line!
+library(tidyverse)
+airbnb <- read_csv("data/Airbnb_NYC_2019.csv")
+
+
+# 2. We want to find the most expensive neighbourhood of NYC. So we need to get
+#    a report containing the following information:
+#    (`neighbourhood`, `avg_price`, `price_rank`)
+#    where `avg_price` is the average price of the apartments in that neighbourhood,
+#    `price_rank` is the quantile of the average price of that neighbourhood, among
+#    all neighbourhoods. E.g., if a neighbourhood is the second most expensive of 5
+#    neighbourhoods, its percent rank will be 0.75.
+nyc_price<-airbnb%>%drop_na()%>%group_by(neighbourhood)%>%summarise(avg_price=mean(price))%>%mutate(price_rank=percent_rank(avg_price))
+
+#    To do that, you can use:
+#        - `drop_na()` to remove the NAs,
+#        - `group_by()` to group the apts by neighourhood,
+#        - `summarise()` to calculate the average price of each neighbourhood.
+#        - `mutate()` and `percent_rank()` to calculate the quantile of
+#          each neighbourhood saved in column `price_rank`.
+#    Save the result data frame to `nyc_price`.
+#    To check your result, `nyc_price` prints to:
+#    # A tibble: 218 x 3
+#    neighbourhood              avg_price price_rank
+#    <chr>                          <dbl>      <dbl>
+#    1 Allerton                        90.6     0.438
+#    2 Arden Heights                   67.2     0.0968
+#    3 Arrochar                       118.      0.659
+#    4 Arverne                        159.      0.802
+#    5 Astoria                        116.      0.645
+#    6 Bath Beach                      84.8     0.355
+#    7 Battery Park City              182.      0.899
+#    8 Bay Ridge                      105.      0.576
+#    9 Bay Terrace                    119.      0.668
+#    10 Bay Terrace, Staten Island     102.      0.562
+#    # … with 208 more rows
+## Do not modify this line!
+
+
+
+# 3. Using `nyc_price`:
+#    Find the top 10% most expensive neighbourhoods and
+#    report them in alphabetical order.
+#    Save the result tibble to `nyc_10percent`.
+
+nyc_10percent<-nyc_price%>%filter(price_rank>0.9)%>%arrange(neighbourhood)
+
+#    To do that, you can use:
+#         - `filter()` function to filter the `price_rank`.
+#         - `arrange()` to reorder the neighbourhoods.
+#    To check your result, `nyc_10percent` prints to :
+#   # A tibble: 22 x 3
+#   neighbourhood      avg_price price_rank
+#   <chr>                  <dbl>      <dbl>
+#   1 Breezy Point            195       0.917
+#   2 Brooklyn Heights        202.      0.922
+#   3 Chelsea                 222.      0.940
+#   4 Cobble Hill             193.      0.912
+#   5 Financial District      219.      0.935
+#   6 Flatiron District       291.      0.986
+#   7 Gramercy                205.      0.926
+#   8 Greenwich Village       239.      0.959
+#   9 Hell's Kitchen          186.      0.903
+#   10 Midtown                 268.      0.972
+#   # … with 12 more rows
+## Do not modify this line!
+
+
+
+# 4. Calculate the median price and median availability days of each room type.
+#    Save the result tibble into `by_type`.
+by_type<-airbnb%>%group_by(room_type)%>%summarise(price=median(price),availability_365=median(availability_365))
+
+#    To do that, you can use:
+#       - `group_by()` and `select()` to group the apartments and select columns.
+#       - `summarize()` to calculate the median of each group.
+#    To check your result, `by_type` prints to:
+#    # A tibble: 3 x 3
+#    room_type       price availability_365
+#    <chr>           <dbl>            <dbl>
+#    1 Entire home/apt   160               42
+#    2 Private room       70               45
+#    3 Shared room        45               90
+## Do not modify this line!
+
+
+
+# 5. We want to know the room tyoes count and proportion in different neighbourhoods.
+#    We need a report contanining the following information:
+#    (neighbourhood, count, prop)
+#    where `prop` is the proportion of each room type among all the rooms in that neighbourhood
+#    and `count` is the total number of each room type in that neighbourhood.
+#    Save the result tibble into `neighbourhood_room`.
+neighbourhood_room<-airbnb%>%group_by(neighbourhood_group)%>%count(room_type,name = 'count')%>%mutate(prop=count/sum(count))
+
+#    To do that, you can use:
+#       - `group_by()` to group the apartments.
+#       - `count()` to count the number of apartments in each group.
+#       - `sum()` to sum the number of apartments in each group.
+#       - `mutate()` to calculate the proportion and add new columnn `prop`.
+#    To check your result, `neighbourhood_room` prints to:
+#    # A tibble: 15 x 4
+#    # Groups:   neighbourhood_group [5]
+#    neighbourhood_group room_type       count   prop
+#    <chr>               <chr>           <int>  <dbl>
+#    1 Bronx               Entire home/apt   379 0.347
+#    2 Bronx               Private room      652 0.598
+#    3 Bronx               Shared room        60 0.0550
+#    4 Brooklyn            Entire home/apt  9559 0.475
+#    5 Brooklyn            Private room    10132 0.504
+#    6 Brooklyn            Shared room       413 0.0205
+#    7 Manhattan           Entire home/apt 13199 0.609
+#    8 Manhattan           Private room     7982 0.368
+#    9 Manhattan           Shared room       480 0.0222
+#    10 Queens              Entire home/apt  2096 0.370
+#    11 Queens              Private room     3372 0.595
+#    12 Queens              Shared room       198 0.0349
+#    13 Staten Island       Entire home/apt   176 0.472
+#    14 Staten Island       Private room      188 0.504
+#    15 Staten Island       Shared room         9 0.0241
+## Do not modify this line!
+
+
+# 6. We want to convert the above tibble to a different form, showing in three separate
+#    columns the proportion of each room type within each neighbourhood.
+#    Save the result tibble into `neighbourhood_room_wider`.
+
+neighbourhood_room_wider<-neighbourhood_room%>%select(-count)%>%pivot_wider(names_from = room_type,values_from = prop)
+  
+#    To do that, you can use:
+#       - `select()` to select the `proportion` column
+#       - `pivot_wider()` to append each room type proportion as a column to the original tibble.
+#    To check your result, `` prints to:
+#    # A tibble: 5 x 4
+#    # Groups:   neighbourhood_group [5]
+#    neighbourhood_group `Entire home/apt` `Private room` `Shared room`
+#    <chr>                           <dbl>          <dbl>         <dbl>
+#    1 Bronx                           0.347          0.598        0.0550
+#    2 Brooklyn                        0.475          0.504        0.0205
+#    3 Manhattan                       0.609          0.368        0.0222
+#    4 Queens                          0.370          0.595        0.0349
+#    5 Staten Island                   0.472          0.504        0.0241
+## Do not modify this line!
+
+
+
+
+
+```
+part12
+```{r}
+# HW5: football result dataset
+# In this problem, we will deal with a dataset of national football game results from
+# 1870s to now. You are not allowed to use loops `for`, `while`, and functions `sort`
+# or `repeat` in this exercise.
+#'
+# 1. Load the file `data/football.csv` and save it into tibble `fu`.
+#    It should have dimensions: `40,945 x 9` and looks like the following:
+#    # A tibble: 40,945 x 9
+#    date       home_team away_team home_score away_score tournament city    country  neutral
+#    <date>     <chr>     <chr>          <dbl>      <dbl> <chr>      <chr>   <chr>    <lgl>
+#  1 1872-11-30 Scotland  England            0          0 Friendly   Glasgow Scotland FALSE
+#  2 1873-03-08 England   Scotland           4          2 Friendly   London  England  FALSE
+#  3 1874-03-07 Scotland  England            2          1 Friendly   Glasgow Scotland FALSE
+#  4 1875-03-06 England   Scotland           2          2 Friendly   London  England  FALSE
+#  5 1876-03-04 Scotland  England            3          0 Friendly   Glasgow Scotland FALSE
+#  6 1876-03-25 Scotland  Wales              4          0 Friendly   Glasgow Scotland FALSE
+#  7 1877-03-03 England   Scotland           1          3 Friendly   London  England  FALSE
+#  8 1877-03-05 Wales     Scotland           0          2 Friendly   Wrexham Wales    FALSE
+#  9 1878-03-02 Scotland  England            7          2 Friendly   Glasgow Scotland FALSE
+#  10 1878-03-23 Scotland  Wales              9          0 Friendly   Glasgow Scotland FALSE
+#    # … with 40,935 more rows
+## Do not modify this line!
+library(tidyverse)
+fu <- read_csv("data/football.csv")
+
+#  2. Sometimes, we want to know the year of a game happening instead of
+#    the exact dates. So now we want to split the dates into three columns:
+#    (`year`, `mon`, `day`) and save the result tibble to `fu_separated`.
+fu_separated<-fu%>%separate(date,into=c('year','mon','day'))
+
+
+
+
+#    To do that, you can use:
+#       - `separate` to separate the first column `date`
+#    (Hint : Use `sep = "[-]+"` in `separate`.)
+#    To check your solution, `fu_separated` prints to:
+#    # A tibble: 40,945 x 11
+#    year  mon   day   home_team away_team home_score away_score tournament city    country  neutral
+#    <chr> <chr> <chr> <chr>     <chr>          <dbl>      <dbl> <chr>      <chr>   <chr>    <lgl>
+#    1 1872  11    30    Scotland  England            0          0 Friendly   Glasgow Scotland FALSE
+#    2 1873  03    08    England   Scotland           4          2 Friendly   London  England  FALSE
+#    3 1874  03    07    Scotland  England            2          1 Friendly   Glasgow Scotland FALSE
+#    4 1875  03    06    England   Scotland           2          2 Friendly   London  England  FALSE
+#    5 1876  03    04    Scotland  England            3          0 Friendly   Glasgow Scotland FALSE
+#    6 1876  03    25    Scotland  Wales              4          0 Friendly   Glasgow Scotland FALSE
+#    7 1877  03    03    England   Scotland           1          3 Friendly   London  England  FALSE
+#    8 1877  03    05    Wales     Scotland           0          2 Friendly   Wrexham Wales    FALSE
+#    9 1878  03    02    Scotland  England            7          2 Friendly   Glasgow Scotland FALSE
+#    10 1878  03    23    Scotland  Wales              9          0 Friendly   Glasgow Scotland FALSE
+#    # … with 40,935 more rows
+## Do not modify this line!
+
+
+
+# 3. Notice that the data is recorded per game instead of per team. But we also want
+#    to have a list to record the game data per team with the following information:
+#    `year`, `mon`, `day`, `home_score`, `away_score`, `tournament`, `city`, `country`,
+#    `neutral`, `team_type`, `team`.
+
+
+fu_tidy<-fu_separated%>%pivot_longer(c(home_team,away_team),names_to ="team_type",values_to = "team" )
+
+
+#    To do that, we need to list all the games each team played.
+#    (so the same game will be recorded twice, one for home team and one for away team)
+#    To do that, you can use:
+#         - `pivot_longer to transform the `home_team` and `away_team` columns to
+#          new columns `team` and `team_type` recording whether this team is `home_team`
+#          or `away_team` in this game.
+#    and save the result tibble into the tibble `fu_tidy`.
+#    (Note: to use the correct version of `select`, write `select <- dplyr::select` beforehand).
+#    To check your solution, `fu_tidy` prints to:
+#    # A tibble: 81,890 x 11
+#    year  mon   day   home_score away_score tournament city    country  neutral team_type team
+#    <chr> <chr> <chr>      <dbl>      <dbl> <chr>      <chr>   <chr>    <lgl>   <chr>     <chr>
+#    1 1872  11    30             0          0 Friendly   Glasgow Scotland FALSE   home_team Scotland
+#    2 1872  11    30             0          0 Friendly   Glasgow Scotland FALSE   away_team England
+#    3 1873  03    08             4          2 Friendly   London  England  FALSE   home_team England
+#    4 1873  03    08             4          2 Friendly   London  England  FALSE   away_team Scotland
+#    5 1874  03    07             2          1 Friendly   Glasgow Scotland FALSE   home_team Scotland
+#    6 1874  03    07             2          1 Friendly   Glasgow Scotland FALSE   away_team England
+#    7 1875  03    06             2          2 Friendly   London  England  FALSE   home_team England
+#    8 1875  03    06             2          2 Friendly   London  England  FALSE   away_team Scotland
+#    9 1876  03    04             3          0 Friendly   Glasgow Scotland FALSE   home_team Scotland
+#    10 1876  03    04             3          0 Friendly   Glasgow Scotland FALSE   away_team England
+#    # … with 81,880 more rows
+## Do not modify this line!
+
+
+
+# 4. Now the two columns `home_score` and `away_score` are redundant for each team.
+#    We just want the score of the team, not the scores of the two teams.
+#    Namely, we want a tibble with the following information:
+#    `year`, `mon`, `day`, `tournament`, `city`, `country`, `neutral`, `team`, `score`
+fu_team<-fu_tidy%>%mutate('score'=if_else(team_type=='home_team',home_score,away_score))%>%select(-c(team_type, home_score, away_score))
+
+
+#    To do that, you can use:
+#         - `mutate` and `if_else` to record the `score` of that team
+#         - `select` to extract all columns except `(team_type, home_score, away_score)`
+#    Save the resulting tibble into `fu_team`.
+#    To check your solution, `fu_team` prints to:
+#    # A tibble: 81,890 x 9
+#    year  mon   day   tournament city    country  neutral team     score
+#    <chr> <chr> <chr> <chr>      <chr>   <chr>    <lgl>   <chr>    <dbl>
+#    1 1872  11    30    Friendly   Glasgow Scotland FALSE   Scotland     0
+#    2 1872  11    30    Friendly   Glasgow Scotland FALSE   England      0
+#    3 1873  03    08    Friendly   London  England  FALSE   England      4
+#    4 1873  03    08    Friendly   London  England  FALSE   Scotland     2
+#    5 1874  03    07    Friendly   Glasgow Scotland FALSE   Scotland     2
+#    6 1874  03    07    Friendly   Glasgow Scotland FALSE   England      1
+#    7 1875  03    06    Friendly   London  England  FALSE   England      2
+#    8 1875  03    06    Friendly   London  England  FALSE   Scotland     2
+#    9 1876  03    04    Friendly   Glasgow Scotland FALSE   Scotland     3
+#    10 1876  03    04    Friendly   Glasgow Scotland FALSE   England      0
+#    # … with 81,880 more rows
+## Do not modify this line!
+
+
+# 5. The `city` and `country` column represents where the game was held.
+#    We want to concatenate the city and country information into one column
+#    called `place` based on our team table `fu_team`.
+fu_city<-fu_team%>%unite('place',city,country)
+
+#    To do that, you can use:
+#          - `unite` to combine `city` and `country`
+#    Save the result tibble to `fu_city`.
+#    To check your solution, `fu_city` prints to:
+#    # A tibble: 81,890 x 8
+#    year  mon   day   tournament place            neutral team     score
+#    <chr> <chr> <chr> <chr>      <chr>            <lgl>   <chr>    <dbl>
+#    1 1872  11    30    Friendly   Glasgow_Scotland FALSE   Scotland     0
+#    2 1872  11    30    Friendly   Glasgow_Scotland FALSE   England      0
+#    3 1873  03    08    Friendly   London_England   FALSE   England      4
+#    4 1873  03    08    Friendly   London_England   FALSE   Scotland     2
+#    5 1874  03    07    Friendly   Glasgow_Scotland FALSE   Scotland     2
+#    6 1874  03    07    Friendly   Glasgow_Scotland FALSE   England      1
+#    7 1875  03    06    Friendly   London_England   FALSE   England      2
+#    8 1875  03    06    Friendly   London_England   FALSE   Scotland     2
+#    9 1876  03    04    Friendly   Glasgow_Scotland FALSE   Scotland     3
+#    10 1876  03    04    Friendly   Glasgow_Scotland FALSE   England      0
+#    # … with 81,880 more rows
+## Do not modify this line!
+
+
+
+# 6. We want to see how the annual average goal number of the english team
+#    changes over the years.
+
+fu_england<-fu_team%>%filter(team=='England')%>%group_by(year)%>%summarise(avg_goal=mean(score))
+#    To do that, you can use:
+#      - `filter()` to select the England team
+#      - `group_by()` and `summarize()` to calculate the annual
+#    average goal number(store in a column called `avg_goal`)
+#    Save the result tibble into `fu_england`
+#    To check your solution, `fu_england` prints to:
+#    # A tibble: 139 x 2
+#    year  avg_goal
+#    <chr>    <dbl>
+#    1 1872       0
+#    2 1873       4
+#    3 1874       1
+#    4 1875       2
+#    5 1876       0
+#    6 1877       1
+#    7 1878       2
+#    8 1879       3.5
+#    9 1880       3.5
+#    10 1881       0.5
+#    # … with 129 more rows
+## Do not modify this line!
+
+
+
+
+
+```
+
+part 13
+```{r}
+# HW5: data manipulation
+#'
+# For this exercise, we will use a dataset related to mammalian sleep.
+# You are not supposed to use any `for`, `while`, `repeat` or `sort` for this exercise.
+#'
+# 1. Load the dataset `msleep` by :
+#      `library(ggplot2)`
+#      `data(msleep)`
+## Do not modify this line!
+library(tidyverse)
+data("msleep")
+
+
+# 2. Calculate the proportion of each group of animals based on their diet
+#    (the column `vore` tells you if an animal is carnivore, herbivore etc...)
+#    into a new column called `vore_prop`.
+
+vore_prop<-msleep%>%count(vore,name = 'count')%>%mutate('prop'=count/sum(count))
+  
+#    To do that, you can use:
+#         - `count()` to count the number of animals within each `vore`.
+#         - `mutate()` to calulate the proportion of each `vore`.
+#    To check your result, the first three lines of `vore_prop` print to:
+#    # A tibble: 5 x 3
+#    vore    count   prop
+#    <chr>   <int>  <dbl>
+#      1 carni      19 0.229
+#    2 herbi      32 0.386
+#    3 insecti     5 0.0602
+## Do not modify this line!
+
+
+# 3. We want to calculate the mean of each column among each animal group.
+#    Specifically, we want a tibble containing the following information:
+#    `vore`, `sleep_total`, `sleep_rem`, `sleep_cycle`, `awake`, `brainwt`, `bodywt`
+#    where each of these variables is the mean among the group.
+vore_means<-msleep%>%group_by(vore)%>%summarise_if(is.numeric,~min(.x,na.rm = TRUE))
+
+#    To do that, you can use:
+#          - `group_by()` to group animals into groups based on `vore`.
+#          - `summarize_if()` to calculate the mean of each property.
+#    To check your result, the first three lines of `vore_means` print to:
+#    # A tibble: 5 x 7
+#    vore    sleep_total sleep_rem sleep_cycle awake brainwt  bodywt
+#    <chr>         <dbl>     <dbl>       <dbl> <dbl>   <dbl>   <dbl>
+#    1 carni         10.4       2.29       0.373 13.6  0.0793   90.8
+#    2 herbi          9.51      1.37       0.418 14.5  0.622   367.
+#    3 insecti       14.9       3.52       0.161  9.06 0.0216   12.9
+## Do not modify this line!
+
+
+
+# 4. Select the animals whose order is `Primates` and save the resulting tibble into
+#    `primate`.
+primate<-msleep%>%filter(order=="Primates")
+
+#    To do that, you can use:
+#         - `filter()` function to select the animals whose order `==` Primates.
+#    To check your solution, the first five lines of `primate` print to:
+#    # A tibble: 12 x 11
+#     name     genus   vore  order conservation sleep_total sleep_rem sleep_cycle awake brainwt bodywt
+#     <chr>    <chr>   <chr> <chr> <chr>              <dbl>     <dbl>       <dbl> <dbl>   <dbl>  <dbl>
+#     1 Owl mon… Aotus   omni  Prim… <NA>                17         1.8      NA       7    0.0155  0.48
+#     2 Grivet   Cercop… omni  Prim… lc                  10         0.7      NA      14   NA       4.75
+#     3 Patas m… Erythr… omni  Prim… lc                  10.9       1.1      NA      13.1  0.115  10
+#     4 Galago   Galago  omni  Prim… <NA>                 9.8       1.1       0.55   14.2  0.005   0.2
+#     5 Human    Homo    omni  Prim… <NA>                 8         1.9       1.5    16    1.32   62
+## Do not modify this line!
+
+
+
+# 5. We want to calculate the brain to body weight proportion (called brain_pro, 
+#    i.e. the ratio between the brain weight and the body weight) of each primate,
+#    and create a tibble `brain_primate` containing `name`, `genus`, `brainwt`, `bodywt`,
+#    and all the sleep properties `sleep_total`, `sleep_rem`, `sleep_cycle`.
+#    While calculating, drop the rows with `NA` brain weight.
+brain_primate<-primate%>%drop_na(brainwt)%>%dplyr::select(name, genus, brainwt, bodywt,starts_with('sleep') )%>%mutate(brain_pro=brainwt/bodywt)
+
+#    To do that, you can use:
+#      - `select()` to select wanted columns, along with `matches()` to  extract columns
+#      with same name pattern and `starts_with()` to extract name with same start letters.
+#      - `mutate()` to add column `brain_pro`.
+#    (Note: to use the correct version of `select`, write `select <- dplyr::select` beforehand).
+#    (Note: to use the correct version of `matches`, write `matches <- dplyr::matches` as well).
+#    To check your solution, the first three lines of `brain_primate` print to:
+#    # A tibble: 9 x 8
+#      name            genus        brainwt bodywt sleep_total sleep_rem sleep_cycle brain_pro
+#      <chr>           <chr>          <dbl>  <dbl>       <dbl>     <dbl>       <dbl>     <dbl>
+#     1 Owl monkey      Aotus         0.0155  0.48         17         1.8      NA       0.0323
+#     2 Patas monkey    Erythrocebus  0.115  10            10.9       1.1      NA       0.0115
+#     3 Galago          Galago        0.005   0.2           9.8       1.1       0.55    0.0250
+## Do not modify this line!
+
+
+
+```
+
+
+
